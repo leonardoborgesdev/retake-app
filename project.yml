@@ -1,0 +1,52 @@
+name: VideoCompressor
+options:
+  bundleIdPrefix: com.automatrix
+  deploymentTarget:
+    iOS: "16.0"
+configs:
+  Debug: debug
+  Release: release
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    GENERATE_INFOPLIST_FILE: YES
+    INFOPLIST_KEY_UILaunchScreen_Generation: YES
+    INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "Precisamos salvar o vídeo comprimido na sua galeria de fotos."
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+packages:
+  FFmpegKitSPM:
+    url: https://github.com/tylerjonesio/ffmpeg-kit-spm
+    exactVersion: 5.1.2
+targets:
+  VideoCompressor:
+    type: application
+    platform: iOS
+    sources:
+      - path: VideoCompressor
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.automatrix.videocompressor
+        TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - package: FFmpegKitSPM
+        product: FFmpeg-Kit
+  VideoCompressorTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: VideoCompressorTests
+    dependencies:
+      - target: VideoCompressor
+schemes:
+  VideoCompressor:
+    build:
+      targets:
+        VideoCompressor: all
+        VideoCompressorTests: [test]
+    test:
+      targets:
+        - VideoCompressorTests
+    run:
+      config: Debug

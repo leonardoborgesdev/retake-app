@@ -1,0 +1,531 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0837BA5ED4E37D99697E0E33 /* PhotoLibrarySaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */; };
+		188EE6DFE6D3669378A2E385 /* CutMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8031F6CF22ED38F5EC41D5F0 /* CutMapper.swift */; };
+		23AFECF55B2462AA71E5304A /* APIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498379D41A52BD6CB03A23B7 /* APIKeyStore.swift */; };
+		3DF6F0311E98E6AEDB3D013F /* CutRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE0480996EA399D2319CF8B /* CutRendererTests.swift */; };
+		4255DACC2CC83AB89BF257FA /* AudioExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7667FEEBDE6F6D2127CFA5 /* AudioExtractor.swift */; };
+		4445924EC5E47BE6995D715E /* SilenceCutPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BCE6D1E77D8CFBC5AE7461 /* SilenceCutPlannerTests.swift */; };
+		484158F59FB9EDE5F7D6316B /* VideoCompressionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38E4DEAC06D289B64E8F4E5 /* VideoCompressionService.swift */; };
+		48D9C0E31832D7661167977E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11AAC68C13634FCB8B908E05 /* SettingsView.swift */; };
+		4A0A629B3D34245FA326E037 /* FFmpegCommandBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8C08E225EDC2BD92B5DC49E /* FFmpegCommandBuilderTests.swift */; };
+		5215EFE697A51D8C57640C84 /* RetakeReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB7E7F31F0DB0C38D7FB4C6 /* RetakeReviewView.swift */; };
+		54843F1D7F350C7CBEEB8712 /* SilenceDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = E475307A15E182B7074F65D1 /* SilenceDetector.swift */; };
+		58BD08EC8CADECCE106BFE0F /* TranscriptQA.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF6278585CBFE5CF58CF6936 /* TranscriptQA.swift */; };
+		5936AE489A3DFD9BB023F164 /* FFmpegCommandBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED02434687B8E2A7A767695 /* FFmpegCommandBuilder.swift */; };
+		5E012619BC480BECA50BCEF5 /* ByteFormatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31083E411555CFD9906B05A /* ByteFormatting.swift */; };
+		5F52583F3A9045379986D6DB /* ByteFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E31C949F604BC22EEE64899 /* ByteFormattingTests.swift */; };
+		709067EFD406422E3BB6C545 /* VideoCompressorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */; };
+		73E1A3DD21FF5CBECDDF728F /* CutRenderExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */; };
+		79D9DB635BDD9CA5238DBF02 /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB11A2909AE0BAB4754CFEA3 /* Movie.swift */; };
+		B0FA19C27A9FBC0CC09CE444 /* CutRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FFA899722E61FB12953DF5 /* CutRenderer.swift */; };
+		BEC621B2EBF85661B192A7B0 /* RetakeCandidate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683D26D126FBCE4446364F44 /* RetakeCandidate.swift */; };
+		C30584796CD41088C3F722B7 /* EditingPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */; };
+		D48CC6205E71472B2B2950A4 /* FFmpeg-Kit in Frameworks */ = {isa = PBXBuildFile; productRef = A24F25A9099F8DCAB4A70F3B /* FFmpeg-Kit */; };
+		D619D30D62BE3F635D9D0B3E /* AssemblyAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6398263456A28C982F6667 /* AssemblyAIClient.swift */; };
+		D7399624C640342C7B1C8D3C /* CutMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B54CAB9B91B5CAE91E4B15 /* CutMapperTests.swift */; };
+		D748E2CE3F15B8F02EC51B37 /* SilenceDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1080CA56E40BB94CBDBCA47E /* SilenceDetectorTests.swift */; };
+		E27F316DF99D302A5BA240D4 /* SilenceCutPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006D960F2F644AEE9040068 /* SilenceCutPlanner.swift */; };
+		E4500B24E78A97AD9205D331 /* TranscriptQATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329399A27CBE1830C01E9079 /* TranscriptQATests.swift */; };
+		F8E21286D7F5483178B969A5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D23DC3F01FAFE94100E29B /* ContentView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CE5DC7824CE2D3FD1B28A881 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 014FC065B64465C92972A10F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DF19C64312DAA79712F37772;
+			remoteInfo = VideoCompressor;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		02D23DC3F01FAFE94100E29B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1080CA56E40BB94CBDBCA47E /* SilenceDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceDetectorTests.swift; sourceTree = "<group>"; };
+		11AAC68C13634FCB8B908E05 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCompressorApp.swift; sourceTree = "<group>"; };
+		2C7667FEEBDE6F6D2127CFA5 /* AudioExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExtractor.swift; sourceTree = "<group>"; };
+		329399A27CBE1830C01E9079 /* TranscriptQATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptQATests.swift; sourceTree = "<group>"; };
+		33FFA899722E61FB12953DF5 /* CutRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutRenderer.swift; sourceTree = "<group>"; };
+		3E31C949F604BC22EEE64899 /* ByteFormattingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteFormattingTests.swift; sourceTree = "<group>"; };
+		3ED02434687B8E2A7A767695 /* FFmpegCommandBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFmpegCommandBuilder.swift; sourceTree = "<group>"; };
+		498379D41A52BD6CB03A23B7 /* APIKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyStore.swift; sourceTree = "<group>"; };
+		4DB7E7F31F0DB0C38D7FB4C6 /* RetakeReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetakeReviewView.swift; sourceTree = "<group>"; };
+		54B54CAB9B91B5CAE91E4B15 /* CutMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutMapperTests.swift; sourceTree = "<group>"; };
+		683D26D126FBCE4446364F44 /* RetakeCandidate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetakeCandidate.swift; sourceTree = "<group>"; };
+		6EE0480996EA399D2319CF8B /* CutRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutRendererTests.swift; sourceTree = "<group>"; };
+		8031F6CF22ED38F5EC41D5F0 /* CutMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutMapper.swift; sourceTree = "<group>"; };
+		84F492E25B64DA64D66C9681 /* VideoCompressor.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = VideoCompressor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A7B944CE29371377FEF056F /* VideoCompressorTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VideoCompressorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibrarySaver.swift; sourceTree = "<group>"; };
+		AB11A2909AE0BAB4754CFEA3 /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
+		B006D960F2F644AEE9040068 /* SilenceCutPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceCutPlanner.swift; sourceTree = "<group>"; };
+		C38E4DEAC06D289B64E8F4E5 /* VideoCompressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCompressionService.swift; sourceTree = "<group>"; };
+		C8C08E225EDC2BD92B5DC49E /* FFmpegCommandBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFmpegCommandBuilderTests.swift; sourceTree = "<group>"; };
+		C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditingPipeline.swift; sourceTree = "<group>"; };
+		D7BCE6D1E77D8CFBC5AE7461 /* SilenceCutPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceCutPlannerTests.swift; sourceTree = "<group>"; };
+		DF6278585CBFE5CF58CF6936 /* TranscriptQA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptQA.swift; sourceTree = "<group>"; };
+		E31083E411555CFD9906B05A /* ByteFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteFormatting.swift; sourceTree = "<group>"; };
+		E475307A15E182B7074F65D1 /* SilenceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceDetector.swift; sourceTree = "<group>"; };
+		EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutRenderExecutor.swift; sourceTree = "<group>"; };
+		FA6398263456A28C982F6667 /* AssemblyAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssemblyAIClient.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		63B293C0F563F6649004D12F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D48CC6205E71472B2B2950A4 /* FFmpeg-Kit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		344447C5905DD30A83026A12 = {
+			isa = PBXGroup;
+			children = (
+				56217E59873D65928773CBE6 /* VideoCompressor */,
+				D5BBFE97236B88FDD6BCC73F /* VideoCompressorTests */,
+				91BAF8200B7ED3002A3D8B8A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		56217E59873D65928773CBE6 /* VideoCompressor */ = {
+			isa = PBXGroup;
+			children = (
+				498379D41A52BD6CB03A23B7 /* APIKeyStore.swift */,
+				FA6398263456A28C982F6667 /* AssemblyAIClient.swift */,
+				2C7667FEEBDE6F6D2127CFA5 /* AudioExtractor.swift */,
+				E31083E411555CFD9906B05A /* ByteFormatting.swift */,
+				02D23DC3F01FAFE94100E29B /* ContentView.swift */,
+				8031F6CF22ED38F5EC41D5F0 /* CutMapper.swift */,
+				33FFA899722E61FB12953DF5 /* CutRenderer.swift */,
+				EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */,
+				C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */,
+				3ED02434687B8E2A7A767695 /* FFmpegCommandBuilder.swift */,
+				AB11A2909AE0BAB4754CFEA3 /* Movie.swift */,
+				9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */,
+				683D26D126FBCE4446364F44 /* RetakeCandidate.swift */,
+				4DB7E7F31F0DB0C38D7FB4C6 /* RetakeReviewView.swift */,
+				11AAC68C13634FCB8B908E05 /* SettingsView.swift */,
+				B006D960F2F644AEE9040068 /* SilenceCutPlanner.swift */,
+				E475307A15E182B7074F65D1 /* SilenceDetector.swift */,
+				DF6278585CBFE5CF58CF6936 /* TranscriptQA.swift */,
+				C38E4DEAC06D289B64E8F4E5 /* VideoCompressionService.swift */,
+				1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */,
+			);
+			path = VideoCompressor;
+			sourceTree = "<group>";
+		};
+		91BAF8200B7ED3002A3D8B8A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				84F492E25B64DA64D66C9681 /* VideoCompressor.app */,
+				8A7B944CE29371377FEF056F /* VideoCompressorTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D5BBFE97236B88FDD6BCC73F /* VideoCompressorTests */ = {
+			isa = PBXGroup;
+			children = (
+				3E31C949F604BC22EEE64899 /* ByteFormattingTests.swift */,
+				54B54CAB9B91B5CAE91E4B15 /* CutMapperTests.swift */,
+				6EE0480996EA399D2319CF8B /* CutRendererTests.swift */,
+				C8C08E225EDC2BD92B5DC49E /* FFmpegCommandBuilderTests.swift */,
+				D7BCE6D1E77D8CFBC5AE7461 /* SilenceCutPlannerTests.swift */,
+				1080CA56E40BB94CBDBCA47E /* SilenceDetectorTests.swift */,
+				329399A27CBE1830C01E9079 /* TranscriptQATests.swift */,
+			);
+			path = VideoCompressorTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B0CE577D7C5839AE3A7F3663 /* VideoCompressorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1EE510DE28208D2D785F69B9 /* Build configuration list for PBXNativeTarget "VideoCompressorTests" */;
+			buildPhases = (
+				E76FE0107986B352E6C06534 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3A81BA6CFD986590F9A3D1CE /* PBXTargetDependency */,
+			);
+			name = VideoCompressorTests;
+			packageProductDependencies = (
+			);
+			productName = VideoCompressorTests;
+			productReference = 8A7B944CE29371377FEF056F /* VideoCompressorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		DF19C64312DAA79712F37772 /* VideoCompressor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FF159E001E59462E8F623BB3 /* Build configuration list for PBXNativeTarget "VideoCompressor" */;
+			buildPhases = (
+				A60C81226D67A93B9AE4FCD2 /* Sources */,
+				63B293C0F563F6649004D12F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VideoCompressor;
+			packageProductDependencies = (
+				A24F25A9099F8DCAB4A70F3B /* FFmpeg-Kit */,
+			);
+			productName = VideoCompressor;
+			productReference = 84F492E25B64DA64D66C9681 /* VideoCompressor.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		014FC065B64465C92972A10F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					B0CE577D7C5839AE3A7F3663 = {
+						ProvisioningStyle = Automatic;
+					};
+					DF19C64312DAA79712F37772 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 1959CF24CB98586E7C123688 /* Build configuration list for PBXProject "VideoCompressor" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 344447C5905DD30A83026A12;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				38DAF03B257101A107FEC06B /* XCRemoteSwiftPackageReference "ffmpeg-kit-spm" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 91BAF8200B7ED3002A3D8B8A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DF19C64312DAA79712F37772 /* VideoCompressor */,
+				B0CE577D7C5839AE3A7F3663 /* VideoCompressorTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A60C81226D67A93B9AE4FCD2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				23AFECF55B2462AA71E5304A /* APIKeyStore.swift in Sources */,
+				D619D30D62BE3F635D9D0B3E /* AssemblyAIClient.swift in Sources */,
+				4255DACC2CC83AB89BF257FA /* AudioExtractor.swift in Sources */,
+				5E012619BC480BECA50BCEF5 /* ByteFormatting.swift in Sources */,
+				F8E21286D7F5483178B969A5 /* ContentView.swift in Sources */,
+				188EE6DFE6D3669378A2E385 /* CutMapper.swift in Sources */,
+				73E1A3DD21FF5CBECDDF728F /* CutRenderExecutor.swift in Sources */,
+				B0FA19C27A9FBC0CC09CE444 /* CutRenderer.swift in Sources */,
+				C30584796CD41088C3F722B7 /* EditingPipeline.swift in Sources */,
+				5936AE489A3DFD9BB023F164 /* FFmpegCommandBuilder.swift in Sources */,
+				79D9DB635BDD9CA5238DBF02 /* Movie.swift in Sources */,
+				0837BA5ED4E37D99697E0E33 /* PhotoLibrarySaver.swift in Sources */,
+				BEC621B2EBF85661B192A7B0 /* RetakeCandidate.swift in Sources */,
+				5215EFE697A51D8C57640C84 /* RetakeReviewView.swift in Sources */,
+				48D9C0E31832D7661167977E /* SettingsView.swift in Sources */,
+				E27F316DF99D302A5BA240D4 /* SilenceCutPlanner.swift in Sources */,
+				54843F1D7F350C7CBEEB8712 /* SilenceDetector.swift in Sources */,
+				58BD08EC8CADECCE106BFE0F /* TranscriptQA.swift in Sources */,
+				484158F59FB9EDE5F7D6316B /* VideoCompressionService.swift in Sources */,
+				709067EFD406422E3BB6C545 /* VideoCompressorApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E76FE0107986B352E6C06534 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5F52583F3A9045379986D6DB /* ByteFormattingTests.swift in Sources */,
+				D7399624C640342C7B1C8D3C /* CutMapperTests.swift in Sources */,
+				3DF6F0311E98E6AEDB3D013F /* CutRendererTests.swift in Sources */,
+				4A0A629B3D34245FA326E037 /* FFmpegCommandBuilderTests.swift in Sources */,
+				4445924EC5E47BE6995D715E /* SilenceCutPlannerTests.swift in Sources */,
+				D748E2CE3F15B8F02EC51B37 /* SilenceDetectorTests.swift in Sources */,
+				E4500B24E78A97AD9205D331 /* TranscriptQATests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3A81BA6CFD986590F9A3D1CE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DF19C64312DAA79712F37772 /* VideoCompressor */;
+			targetProxy = CE5DC7824CE2D3FD1B28A881 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6C2093FA97B0DAC6674C9A1D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.automatrix.VideoCompressorTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VideoCompressor.app/VideoCompressor";
+			};
+			name = Release;
+		};
+		8CF8AC839049488100F9245B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Precisamos salvar o vídeo comprimido na sua galeria de fotos.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		98BFE8EE2B33BF8C978B29A6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.automatrix.videocompressor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		CAD3F8797915508A6F96D236 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.automatrix.videocompressor;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E3EF1F90E5DA6F03B7A0C135 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.automatrix.VideoCompressorTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VideoCompressor.app/VideoCompressor";
+			};
+			name = Debug;
+		};
+		E68DB99FDAF2A596A8F84ECB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Precisamos salvar o vídeo comprimido na sua galeria de fotos.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1959CF24CB98586E7C123688 /* Build configuration list for PBXProject "VideoCompressor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E68DB99FDAF2A596A8F84ECB /* Debug */,
+				8CF8AC839049488100F9245B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1EE510DE28208D2D785F69B9 /* Build configuration list for PBXNativeTarget "VideoCompressorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E3EF1F90E5DA6F03B7A0C135 /* Debug */,
+				6C2093FA97B0DAC6674C9A1D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FF159E001E59462E8F623BB3 /* Build configuration list for PBXNativeTarget "VideoCompressor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CAD3F8797915508A6F96D236 /* Debug */,
+				98BFE8EE2B33BF8C978B29A6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		38DAF03B257101A107FEC06B /* XCRemoteSwiftPackageReference "ffmpeg-kit-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tylerjonesio/ffmpeg-kit-spm";
+			requirement = {
+				kind = exactVersion;
+				version = 5.1.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A24F25A9099F8DCAB4A70F3B /* FFmpeg-Kit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38DAF03B257101A107FEC06B /* XCRemoteSwiftPackageReference "ffmpeg-kit-spm" */;
+			productName = "FFmpeg-Kit";
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 014FC065B64465C92972A10F /* Project object */;
+}

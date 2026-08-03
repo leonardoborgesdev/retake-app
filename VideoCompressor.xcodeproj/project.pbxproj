@@ -10,6 +10,7 @@
 		0837BA5ED4E37D99697E0E33 /* PhotoLibrarySaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */; };
 		188EE6DFE6D3669378A2E385 /* CutMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8031F6CF22ED38F5EC41D5F0 /* CutMapper.swift */; };
 		23AFECF55B2462AA71E5304A /* APIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498379D41A52BD6CB03A23B7 /* APIKeyStore.swift */; };
+		2E996FF9196E49CC53DB2C10 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */; };
 		3DF6F0311E98E6AEDB3D013F /* CutRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE0480996EA399D2319CF8B /* CutRendererTests.swift */; };
 		4255DACC2CC83AB89BF257FA /* AudioExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7667FEEBDE6F6D2127CFA5 /* AudioExtractor.swift */; };
 		4445924EC5E47BE6995D715E /* SilenceCutPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BCE6D1E77D8CFBC5AE7461 /* SilenceCutPlannerTests.swift */; };
@@ -24,8 +25,12 @@
 		5F52583F3A9045379986D6DB /* ByteFormattingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E31C949F604BC22EEE64899 /* ByteFormattingTests.swift */; };
 		709067EFD406422E3BB6C545 /* VideoCompressorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */; };
 		73E1A3DD21FF5CBECDDF728F /* CutRenderExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */; };
+		76570FD75D9F484B5154EF85 /* FFmpeg-Kit in Embed Frameworks */ = {isa = PBXBuildFile; productRef = A24F25A9099F8DCAB4A70F3B /* FFmpeg-Kit */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		79D9DB635BDD9CA5238DBF02 /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB11A2909AE0BAB4754CFEA3 /* Movie.swift */; };
+		A93278994F1C049DCDDE29CE /* FFmpegLogBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */; };
+		AEFFD8498955BBCC78E65AFD /* CompressOnlyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B48328B1B22F393204EF9A /* CompressOnlyView.swift */; };
 		B0FA19C27A9FBC0CC09CE444 /* CutRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FFA899722E61FB12953DF5 /* CutRenderer.swift */; };
+		BA2CE053BE7962A333E19A27 /* CutOnlyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 835A1FB86A59848BD71FD3B3 /* CutOnlyView.swift */; };
 		BEC621B2EBF85661B192A7B0 /* RetakeCandidate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683D26D126FBCE4446364F44 /* RetakeCandidate.swift */; };
 		C30584796CD41088C3F722B7 /* EditingPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */; };
 		D48CC6205E71472B2B2950A4 /* FFmpeg-Kit in Frameworks */ = {isa = PBXBuildFile; productRef = A24F25A9099F8DCAB4A70F3B /* FFmpeg-Kit */; };
@@ -34,7 +39,6 @@
 		D748E2CE3F15B8F02EC51B37 /* SilenceDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1080CA56E40BB94CBDBCA47E /* SilenceDetectorTests.swift */; };
 		E27F316DF99D302A5BA240D4 /* SilenceCutPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006D960F2F644AEE9040068 /* SilenceCutPlanner.swift */; };
 		E4500B24E78A97AD9205D331 /* TranscriptQATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329399A27CBE1830C01E9079 /* TranscriptQATests.swift */; };
-		F8E21286D7F5483178B969A5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D23DC3F01FAFE94100E29B /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,10 +51,24 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		CCCF504031DB2D1998258DFC /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				76570FD75D9F484B5154EF85 /* FFmpeg-Kit in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		02D23DC3F01FAFE94100E29B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1080CA56E40BB94CBDBCA47E /* SilenceDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceDetectorTests.swift; sourceTree = "<group>"; };
 		11AAC68C13634FCB8B908E05 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		18B48328B1B22F393204EF9A /* CompressOnlyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressOnlyView.swift; sourceTree = "<group>"; };
 		1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCompressorApp.swift; sourceTree = "<group>"; };
 		2C7667FEEBDE6F6D2127CFA5 /* AudioExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExtractor.swift; sourceTree = "<group>"; };
 		329399A27CBE1830C01E9079 /* TranscriptQATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptQATests.swift; sourceTree = "<group>"; };
@@ -60,10 +78,12 @@
 		498379D41A52BD6CB03A23B7 /* APIKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyStore.swift; sourceTree = "<group>"; };
 		4DB7E7F31F0DB0C38D7FB4C6 /* RetakeReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetakeReviewView.swift; sourceTree = "<group>"; };
 		54B54CAB9B91B5CAE91E4B15 /* CutMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutMapperTests.swift; sourceTree = "<group>"; };
+		5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		683D26D126FBCE4446364F44 /* RetakeCandidate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetakeCandidate.swift; sourceTree = "<group>"; };
 		6EE0480996EA399D2319CF8B /* CutRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutRendererTests.swift; sourceTree = "<group>"; };
 		8031F6CF22ED38F5EC41D5F0 /* CutMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutMapper.swift; sourceTree = "<group>"; };
-		84F492E25B64DA64D66C9681 /* VideoCompressor.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = VideoCompressor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		835A1FB86A59848BD71FD3B3 /* CutOnlyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutOnlyView.swift; sourceTree = "<group>"; };
+		84F492E25B64DA64D66C9681 /* VideoCompressor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoCompressor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A7B944CE29371377FEF056F /* VideoCompressorTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VideoCompressorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibrarySaver.swift; sourceTree = "<group>"; };
 		AB11A2909AE0BAB4754CFEA3 /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
@@ -73,6 +93,7 @@
 		C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditingPipeline.swift; sourceTree = "<group>"; };
 		D7BCE6D1E77D8CFBC5AE7461 /* SilenceCutPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceCutPlannerTests.swift; sourceTree = "<group>"; };
 		DF6278585CBFE5CF58CF6936 /* TranscriptQA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptQA.swift; sourceTree = "<group>"; };
+		E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFmpegLogBuffer.swift; sourceTree = "<group>"; };
 		E31083E411555CFD9906B05A /* ByteFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteFormatting.swift; sourceTree = "<group>"; };
 		E475307A15E182B7074F65D1 /* SilenceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceDetector.swift; sourceTree = "<group>"; };
 		EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutRenderExecutor.swift; sourceTree = "<group>"; };
@@ -107,12 +128,15 @@
 				FA6398263456A28C982F6667 /* AssemblyAIClient.swift */,
 				2C7667FEEBDE6F6D2127CFA5 /* AudioExtractor.swift */,
 				E31083E411555CFD9906B05A /* ByteFormatting.swift */,
-				02D23DC3F01FAFE94100E29B /* ContentView.swift */,
+				18B48328B1B22F393204EF9A /* CompressOnlyView.swift */,
 				8031F6CF22ED38F5EC41D5F0 /* CutMapper.swift */,
+				835A1FB86A59848BD71FD3B3 /* CutOnlyView.swift */,
 				33FFA899722E61FB12953DF5 /* CutRenderer.swift */,
 				EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */,
 				C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */,
 				3ED02434687B8E2A7A767695 /* FFmpegCommandBuilder.swift */,
+				E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */,
+				5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */,
 				AB11A2909AE0BAB4754CFEA3 /* Movie.swift */,
 				9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */,
 				683D26D126FBCE4446364F44 /* RetakeCandidate.swift */,
@@ -177,6 +201,7 @@
 			buildPhases = (
 				A60C81226D67A93B9AE4FCD2 /* Sources */,
 				63B293C0F563F6649004D12F /* Frameworks */,
+				CCCF504031DB2D1998258DFC /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -200,6 +225,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					B0CE577D7C5839AE3A7F3663 = {
+						DevelopmentTeam = 4A4U3J9F55;
 						ProvisioningStyle = Automatic;
 					};
 					DF19C64312DAA79712F37772 = {
@@ -239,12 +265,15 @@
 				D619D30D62BE3F635D9D0B3E /* AssemblyAIClient.swift in Sources */,
 				4255DACC2CC83AB89BF257FA /* AudioExtractor.swift in Sources */,
 				5E012619BC480BECA50BCEF5 /* ByteFormatting.swift in Sources */,
-				F8E21286D7F5483178B969A5 /* ContentView.swift in Sources */,
+				AEFFD8498955BBCC78E65AFD /* CompressOnlyView.swift in Sources */,
 				188EE6DFE6D3669378A2E385 /* CutMapper.swift in Sources */,
+				BA2CE053BE7962A333E19A27 /* CutOnlyView.swift in Sources */,
 				73E1A3DD21FF5CBECDDF728F /* CutRenderExecutor.swift in Sources */,
 				B0FA19C27A9FBC0CC09CE444 /* CutRenderer.swift in Sources */,
 				C30584796CD41088C3F722B7 /* EditingPipeline.swift in Sources */,
 				5936AE489A3DFD9BB023F164 /* FFmpegCommandBuilder.swift in Sources */,
+				A93278994F1C049DCDDE29CE /* FFmpegLogBuffer.swift in Sources */,
+				2E996FF9196E49CC53DB2C10 /* HomeView.swift in Sources */,
 				79D9DB635BDD9CA5238DBF02 /* Movie.swift in Sources */,
 				0837BA5ED4E37D99697E0E33 /* PhotoLibrarySaver.swift in Sources */,
 				BEC621B2EBF85661B192A7B0 /* RetakeCandidate.swift in Sources */,
@@ -336,6 +365,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4A4U3J9F55;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -366,6 +396,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = H5XDAAVPGT;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -381,6 +412,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = H5XDAAVPGT;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -444,6 +476,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4A4U3J9F55;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;

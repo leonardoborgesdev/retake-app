@@ -10,6 +10,7 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 4A4U3J9F55
     GENERATE_INFOPLIST_FILE: YES
     INFOPLIST_KEY_UILaunchScreen_Generation: YES
     INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "Precisamos salvar o vídeo comprimido na sua galeria de fotos."
@@ -32,6 +33,8 @@ targets:
     dependencies:
       - package: FFmpegKitSPM
         product: FFmpeg-Kit
+        embed: true
+        codeSign: true
   VideoCompressorTests:
     type: bundle.unit-test
     platform: iOS

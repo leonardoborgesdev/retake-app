@@ -12,26 +12,6 @@ enum SilenceDetectionError: LocalizedError {
     }
 }
 
-/// Thread-safe accumulator for ffmpeg log lines. FFmpegKit's log callback can be invoked
-/// from a background queue for every log line while the complete callback fires once at
-/// the end; both must be able to touch this buffer safely.
-private final class LogBuffer: @unchecked Sendable {
-    private var lines: [String] = []
-    private let lock = NSLock()
-
-    func append(_ line: String) {
-        lock.lock()
-        lines.append(line)
-        lock.unlock()
-    }
-
-    func joinedText() -> String {
-        lock.lock()
-        defer { lock.unlock() }
-        return lines.joined(separator: "\n")
-    }
-}
-
 enum SilenceDetector {
     static func parseLog(_ log: String) -> [SilenceInterval] {
         let starts = matches(in: log, pattern: #"silence_start:\s*([\d.]+)"#)
@@ -41,7 +21,7 @@ enum SilenceDetector {
 
     static func detectSilence(inputURL: URL, noiseDB: Int = -30, minDuration: Double = 0.15) async throws -> [SilenceInterval] {
         let command = "-i \"\(inputURL.path)\" -af silencedetect=noise=\(noiseDB)dB:d=\(minDuration) -f null -"
-        let buffer = LogBuffer()
+        let buffer = FFmpegLogBuffer()
 
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[SilenceInterval], Error>) in
             FFmpegKit.executeAsync(command, withCompleteCallback: { session in
@@ -52,7 +32,7 @@ enum SilenceDetector {
                 if ReturnCode.isSuccess(session.getReturnCode()) {
                     continuation.resume(returning: parseLog(buffer.joinedText()))
                 } else {
-                    let trace = session.getFailStackTrace() ?? "erro desconhecido"
+                    let trace = session.getFailStackTrace() ?? buffer.lastLines(5) ?? "erro desconhecido"
                     continuation.resume(throwing: SilenceDetectionError.ffmpegFailed(trace))
                 }
             }, withLogCallback: { log in

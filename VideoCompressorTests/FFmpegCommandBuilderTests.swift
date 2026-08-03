@@ -11,13 +11,13 @@ final class FFmpegCommandBuilderTests: XCTestCase {
         XCTAssertTrue(command.hasSuffix("\"/tmp/output.mp4\""))
     }
 
-    func test_compressionArguments_usesHEVCWithConstantQuality() {
+    func test_compressionArguments_usesHardwareHEVCEncoder() {
         let command = FFmpegCommandBuilder.compressionArguments(
             inputPath: "/tmp/input.mov",
             outputPath: "/tmp/output.mp4"
         )
-        XCTAssertTrue(command.contains("-c:v libx265"))
-        XCTAssertTrue(command.contains("-crf 23"))
+        XCTAssertTrue(command.contains("-c:v hevc_videotoolbox"))
+        XCTAssertTrue(command.contains("-b:v"))
         XCTAssertTrue(command.contains("-c:a copy"))
         XCTAssertTrue(command.contains("-tag:v hvc1"))
     }

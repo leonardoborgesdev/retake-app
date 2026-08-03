@@ -14,6 +14,9 @@ enum CutRenderError: LocalizedError {
 }
 
 enum CutRenderExecutor {
+    /// Uses the iPhone's hardware HEVC encoder (VideoToolbox) instead of libx264: the
+    /// ffmpeg-kit-spm build we ship is the GPL-free "min" variant, which does not include
+    /// libx264/libx265.
     static func render(sourceURL: URL, duration: Double, cuts: [CutRange], outputURL: URL) async throws {
         let fps = try await frameRate(url: sourceURL)
         let keep = CutRenderer.buildKeepSegments(duration: duration, cuts: cuts, fps: fps)
@@ -24,7 +27,9 @@ enum CutRenderExecutor {
         defer { try? FileManager.default.removeItem(at: filterScriptURL) }
 
         let command = "-y -i \"\(sourceURL.path)\" -filter_complex_script \"\(filterScriptURL.path)\" "
-            + "-map \"[outv]\" -map \"[outa]\" -c:v libx264 -crf 18 -preset medium -c:a aac -b:a 192k \"\(outputURL.path)\""
+            + "-map \"[outv]\" -map \"[outa]\" -c:v hevc_videotoolbox -b:v 10000k -tag:v hvc1 -c:a aac -b:a 192k \"\(outputURL.path)\""
+
+        let buffer = FFmpegLogBuffer()
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             FFmpegKit.executeAsync(command, withCompleteCallback: { session in
@@ -35,9 +40,14 @@ enum CutRenderExecutor {
                 if ReturnCode.isSuccess(session.getReturnCode()) {
                     continuation.resume()
                 } else {
-                    continuation.resume(throwing: CutRenderError.ffmpegFailed(session.getFailStackTrace() ?? "erro desconhecido"))
+                    let trace = session.getFailStackTrace() ?? buffer.lastLines(5) ?? "erro desconhecido"
+                    continuation.resume(throwing: CutRenderError.ffmpegFailed(trace))
                 }
-            }, withLogCallback: nil, withStatisticsCallback: nil)
+            }, withLogCallback: { log in
+                if let message = log?.getMessage() {
+                    buffer.append(message)
+                }
+            }, withStatisticsCallback: nil)
         }
     }
 

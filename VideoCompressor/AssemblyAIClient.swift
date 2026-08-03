@@ -99,7 +99,13 @@ final class AssemblyAIClient {
 
     private struct TranscriptRequest: Encodable {
         let audioURL: String
-        enum CodingKeys: String, CodingKey { case audioURL = "audio_url" }
+        /// Fixed to Portuguese instead of relying on automatic language detection: AssemblyAI
+        /// can't run detection on clips shorter than ~50 seconds, which fails short test videos.
+        let languageCode = "pt"
+        enum CodingKeys: String, CodingKey {
+            case audioURL = "audio_url"
+            case languageCode = "language_code"
+        }
     }
 
     private struct TranscriptCreateResponse: Decodable {

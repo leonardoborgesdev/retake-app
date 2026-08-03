@@ -30,6 +30,8 @@ final class VideoCompressionService: ObservableObject {
             outputPath: outputURL.path
         )
 
+        let buffer = FFmpegLogBuffer()
+
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             let session = FFmpegKit.executeAsync(command, withCompleteCallback: { [weak self] session in
                 Task { @MainActor in
@@ -44,11 +46,15 @@ final class VideoCompressionService: ObservableObject {
                     } else if ReturnCode.isCancel(returnCode) {
                         continuation.resume(throwing: VideoCompressionError.cancelled)
                     } else {
-                        let trace = session.getFailStackTrace() ?? "erro desconhecido"
+                        let trace = session.getFailStackTrace() ?? buffer.lastLines(5) ?? "erro desconhecido"
                         continuation.resume(throwing: VideoCompressionError.ffmpegFailed(trace))
                     }
                 }
-            }, withLogCallback: nil, withStatisticsCallback: { [weak self] statistics in
+            }, withLogCallback: { log in
+                if let message = log?.getMessage() {
+                    buffer.append(message)
+                }
+            }, withStatisticsCallback: { [weak self] statistics in
                 guard let statistics, durationSeconds > 0 else { return }
                 let processedSeconds = Double(statistics.getTime()) / 1000.0
                 let fraction = min(max(processedSeconds / durationSeconds, 0), 1)

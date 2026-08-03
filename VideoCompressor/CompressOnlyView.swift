@@ -1,10 +1,9 @@
 import SwiftUI
-import PhotosUI
 import AVKit
 
 struct CompressOnlyView: View {
-    @State private var selectedItem: PhotosPickerItem?
-    @State private var importedMovie: Movie?
+    @State private var showPicker = false
+    @State private var importedVideoURL: URL?
     @State private var player: AVPlayer?
     @State private var originalSizeBytes: Int64?
     @State private var compressedSizeBytes: Int64?
@@ -60,7 +59,9 @@ struct CompressOnlyView: View {
                 Spacer()
             }
 
-            PhotosPicker(selection: $selectedItem, matching: .videos) {
+            Button {
+                showPicker = true
+            } label: {
                 Label("Importar vídeo", systemImage: "photo.on.rectangle")
             }
             .buttonStyle(.bordered)
@@ -68,8 +69,11 @@ struct CompressOnlyView: View {
         .padding()
         .navigationTitle("Comprimir vídeo")
         .navigationBarTitleDisplayMode(.inline)
-        .onChange(of: selectedItem) { newItem in
-            Task { await loadVideo(from: newItem) }
+        .sheet(isPresented: $showPicker) {
+            VideoPicker { result in
+                handlePicked(result)
+            }
+            .ignoresSafeArea()
         }
         .alert("Erro", isPresented: .constant(errorMessage != nil), actions: {
             Button("OK") { errorMessage = nil }
@@ -78,24 +82,20 @@ struct CompressOnlyView: View {
         })
     }
 
-    private func loadVideo(from item: PhotosPickerItem?) async {
-        guard let item else { return }
+    private func handlePicked(_ result: Result<URL, Error>) {
         resetState()
-        do {
-            guard let movie = try await item.loadTransferable(type: Movie.self) else {
-                errorMessage = "Não foi possível carregar o vídeo selecionado."
-                return
-            }
-            importedMovie = movie
-            player = AVPlayer(url: movie.url)
-            originalSizeBytes = fileSize(at: movie.url)
-        } catch {
+        switch result {
+        case .success(let url):
+            importedVideoURL = url
+            player = AVPlayer(url: url)
+            originalSizeBytes = fileSize(at: url)
+        case .failure(let error):
             errorMessage = error.localizedDescription
         }
     }
 
     private func compress() async {
-        guard let importedMovie else { return }
+        guard let importedVideoURL else { return }
         isCompressing = true
         defer { isCompressing = false }
 
@@ -103,7 +103,7 @@ struct CompressOnlyView: View {
             .appendingPathComponent("compressed-\(UUID().uuidString)")
             .appendingPathExtension("mp4")
         do {
-            try await compressionService.compress(inputURL: importedMovie.url, outputURL: outputURL)
+            try await compressionService.compress(inputURL: importedVideoURL, outputURL: outputURL)
             compressedSizeBytes = fileSize(at: outputURL)
             try await PhotoLibrarySaver.save(videoURL: outputURL)
             didSave = true
@@ -115,7 +115,7 @@ struct CompressOnlyView: View {
     }
 
     private func resetState() {
-        importedMovie = nil
+        importedVideoURL = nil
         player = nil
         originalSizeBytes = nil
         compressedSizeBytes = nil

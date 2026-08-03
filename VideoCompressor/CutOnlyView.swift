@@ -1,10 +1,9 @@
 import SwiftUI
-import PhotosUI
 import AVKit
 
 struct CutOnlyView: View {
-    @State private var selectedItem: PhotosPickerItem?
-    @State private var importedMovie: Movie?
+    @State private var showPicker = false
+    @State private var importedVideoURL: URL?
     @State private var player: AVPlayer?
     @State private var didSave = false
     @State private var isSaving = false
@@ -51,7 +50,9 @@ struct CutOnlyView: View {
                 Spacer()
             }
 
-            PhotosPicker(selection: $selectedItem, matching: .videos) {
+            Button {
+                showPicker = true
+            } label: {
                 Label("Importar vídeo", systemImage: "photo.on.rectangle")
             }
             .buttonStyle(.bordered)
@@ -59,21 +60,24 @@ struct CutOnlyView: View {
         .padding()
         .navigationTitle("Cortar silêncios e retakes")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showPicker) {
+            VideoPicker { result in
+                handlePicked(result)
+            }
+            .ignoresSafeArea()
+        }
         .sheet(isPresented: Binding(
             get: { editingPipeline.stage == .reviewingRetakes },
             set: { _ in }
         )) {
-            if let importedMovie {
+            if let importedVideoURL {
                 RetakeReviewView(
-                    editedVideoURL: importedMovie.url,
+                    editedVideoURL: importedVideoURL,
                     candidates: editingPipeline.retakeCandidates
                 ) { keepFirstIDs in
                     Task { await resolveRetakes(keepFirstIDs: keepFirstIDs) }
                 }
             }
-        }
-        .onChange(of: selectedItem) { newItem in
-            Task { await loadVideo(from: newItem) }
         }
         .alert("Erro", isPresented: .constant(errorMessage != nil), actions: {
             Button("OK") { errorMessage = nil }
@@ -103,24 +107,20 @@ struct CutOnlyView: View {
         }
     }
 
-    private func loadVideo(from item: PhotosPickerItem?) async {
-        guard let item else { return }
+    private func handlePicked(_ result: Result<URL, Error>) {
         resetState()
-        do {
-            guard let movie = try await item.loadTransferable(type: Movie.self) else {
-                errorMessage = "Não foi possível carregar o vídeo selecionado."
-                return
-            }
-            importedMovie = movie
-            player = AVPlayer(url: movie.url)
-        } catch {
+        switch result {
+        case .success(let url):
+            importedVideoURL = url
+            player = AVPlayer(url: url)
+        case .failure(let error):
             errorMessage = error.localizedDescription
         }
     }
 
     private func runEditingPipeline() async {
-        guard let importedMovie else { return }
-        if let result = await editingPipeline.run(sourceURL: importedMovie.url) {
+        guard let importedVideoURL else { return }
+        if let result = await editingPipeline.run(sourceURL: importedVideoURL) {
             await save(url: result)
         } else if let message = editingPipeline.errorMessage {
             errorMessage = message
@@ -148,7 +148,7 @@ struct CutOnlyView: View {
     }
 
     private func resetState() {
-        importedMovie = nil
+        importedVideoURL = nil
         player = nil
         didSave = false
         errorMessage = nil

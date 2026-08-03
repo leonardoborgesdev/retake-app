@@ -12,6 +12,7 @@
 		23AFECF55B2462AA71E5304A /* APIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 498379D41A52BD6CB03A23B7 /* APIKeyStore.swift */; };
 		2E996FF9196E49CC53DB2C10 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */; };
 		3DF6F0311E98E6AEDB3D013F /* CutRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EE0480996EA399D2319CF8B /* CutRendererTests.swift */; };
+		3F6590BD69B4BFDAAB06B912 /* VideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC3F6BF2381DEAAE7C4313C /* VideoPicker.swift */; };
 		4255DACC2CC83AB89BF257FA /* AudioExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7667FEEBDE6F6D2127CFA5 /* AudioExtractor.swift */; };
 		4445924EC5E47BE6995D715E /* SilenceCutPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BCE6D1E77D8CFBC5AE7461 /* SilenceCutPlannerTests.swift */; };
 		484158F59FB9EDE5F7D6316B /* VideoCompressionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38E4DEAC06D289B64E8F4E5 /* VideoCompressionService.swift */; };
@@ -26,7 +27,6 @@
 		709067EFD406422E3BB6C545 /* VideoCompressorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */; };
 		73E1A3DD21FF5CBECDDF728F /* CutRenderExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */; };
 		76570FD75D9F484B5154EF85 /* FFmpeg-Kit in Embed Frameworks */ = {isa = PBXBuildFile; productRef = A24F25A9099F8DCAB4A70F3B /* FFmpeg-Kit */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		79D9DB635BDD9CA5238DBF02 /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB11A2909AE0BAB4754CFEA3 /* Movie.swift */; };
 		A93278994F1C049DCDDE29CE /* FFmpegLogBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */; };
 		AEFFD8498955BBCC78E65AFD /* CompressOnlyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B48328B1B22F393204EF9A /* CompressOnlyView.swift */; };
 		B0FA19C27A9FBC0CC09CE444 /* CutRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FFA899722E61FB12953DF5 /* CutRenderer.swift */; };
@@ -86,7 +86,6 @@
 		84F492E25B64DA64D66C9681 /* VideoCompressor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VideoCompressor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A7B944CE29371377FEF056F /* VideoCompressorTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VideoCompressorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibrarySaver.swift; sourceTree = "<group>"; };
-		AB11A2909AE0BAB4754CFEA3 /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
 		B006D960F2F644AEE9040068 /* SilenceCutPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceCutPlanner.swift; sourceTree = "<group>"; };
 		C38E4DEAC06D289B64E8F4E5 /* VideoCompressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCompressionService.swift; sourceTree = "<group>"; };
 		C8C08E225EDC2BD92B5DC49E /* FFmpegCommandBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFmpegCommandBuilderTests.swift; sourceTree = "<group>"; };
@@ -98,6 +97,7 @@
 		E475307A15E182B7074F65D1 /* SilenceDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceDetector.swift; sourceTree = "<group>"; };
 		EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutRenderExecutor.swift; sourceTree = "<group>"; };
 		FA6398263456A28C982F6667 /* AssemblyAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssemblyAIClient.swift; sourceTree = "<group>"; };
+		FDC3F6BF2381DEAAE7C4313C /* VideoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPicker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,7 +137,6 @@
 				3ED02434687B8E2A7A767695 /* FFmpegCommandBuilder.swift */,
 				E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */,
 				5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */,
-				AB11A2909AE0BAB4754CFEA3 /* Movie.swift */,
 				9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */,
 				683D26D126FBCE4446364F44 /* RetakeCandidate.swift */,
 				4DB7E7F31F0DB0C38D7FB4C6 /* RetakeReviewView.swift */,
@@ -147,6 +146,7 @@
 				DF6278585CBFE5CF58CF6936 /* TranscriptQA.swift */,
 				C38E4DEAC06D289B64E8F4E5 /* VideoCompressionService.swift */,
 				1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */,
+				FDC3F6BF2381DEAAE7C4313C /* VideoPicker.swift */,
 			);
 			path = VideoCompressor;
 			sourceTree = "<group>";
@@ -274,7 +274,6 @@
 				5936AE489A3DFD9BB023F164 /* FFmpegCommandBuilder.swift in Sources */,
 				A93278994F1C049DCDDE29CE /* FFmpegLogBuffer.swift in Sources */,
 				2E996FF9196E49CC53DB2C10 /* HomeView.swift in Sources */,
-				79D9DB635BDD9CA5238DBF02 /* Movie.swift in Sources */,
 				0837BA5ED4E37D99697E0E33 /* PhotoLibrarySaver.swift in Sources */,
 				BEC621B2EBF85661B192A7B0 /* RetakeCandidate.swift in Sources */,
 				5215EFE697A51D8C57640C84 /* RetakeReviewView.swift in Sources */,
@@ -284,6 +283,7 @@
 				58BD08EC8CADECCE106BFE0F /* TranscriptQA.swift in Sources */,
 				484158F59FB9EDE5F7D6316B /* VideoCompressionService.swift in Sources */,
 				709067EFD406422E3BB6C545 /* VideoCompressorApp.swift in Sources */,
+				3F6590BD69B4BFDAAB06B912 /* VideoPicker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

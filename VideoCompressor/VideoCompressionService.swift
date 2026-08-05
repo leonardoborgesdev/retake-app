@@ -22,13 +22,13 @@ final class VideoCompressionService: ObservableObject {
 
     private var currentSession: FFmpegSession?
 
-    func compress(inputURL: URL, outputURL: URL, enhanceQuality: Bool) async throws {
+    func compress(inputURL: URL, outputURL: URL, tier: CompressionTier) async throws {
         progress = 0
         let durationSeconds = try await videoDurationSeconds(url: inputURL)
         let command = FFmpegCommandBuilder.compressionArguments(
             inputPath: inputURL.path,
             outputPath: outputURL.path,
-            enhanceQuality: enhanceQuality
+            tier: tier
         )
 
         let buffer = FFmpegLogBuffer()
@@ -71,7 +71,7 @@ final class VideoCompressionService: ObservableObject {
         currentSession?.cancel()
     }
 
-    private func videoDurationSeconds(url: URL) async throws -> Double {
+    func videoDurationSeconds(url: URL) async throws -> Double {
         let asset = AVURLAsset(url: url)
         let duration = try await asset.load(.duration)
         return CMTimeGetSeconds(duration)

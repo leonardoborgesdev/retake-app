@@ -54,11 +54,16 @@ final class CameraRecorder: NSObject, ObservableObject {
         session.commitConfiguration()
     }
 
-    func startSession() {
+    /// AVCaptureSession.startRunning() blocks until the session is actually running -
+    /// but it was previously fired from a detached Task without being awaited, so the
+    /// UI advanced to the camera-ready stage before the camera had actually started.
+    /// That race is what showed up as "black screen, Stop does nothing": recording was
+    /// started on a session that was not running yet.
+    func startSession() async {
         guard !session.isRunning else { return }
-        Task.detached(priority: .userInitiated) { [session] in
+        await Task.detached(priority: .userInitiated) { [session] in
             session.startRunning()
-        }
+        }.value
     }
 
     func stopSession() {

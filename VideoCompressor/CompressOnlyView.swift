@@ -1,5 +1,6 @@
 import SwiftUI
 import AVKit
+import UIKit
 
 struct CompressOnlyView: View {
     var initialURL: URL? = nil
@@ -11,15 +12,18 @@ struct CompressOnlyView: View {
     @State private var importedAssetIdentifier: String?
     @State private var player: AVPlayer?
     @State private var originalSizeBytes: Int64?
+    @State private var sourceDurationSeconds: Double?
     @State private var compressedSizeBytes: Int64?
     @State private var isCompressing = false
     @State private var didSave = false
     @State private var didDeleteOriginal = false
     @State private var isDeletingOriginal = false
     @State private var errorMessage: String?
-    @AppStorage("enhanceQuality") private var enhanceQuality = true
+    @AppStorage("compressionTier") private var tierRawValue = CompressionTier.balanced.rawValue
 
     @StateObject private var compressionService = VideoCompressionService()
+
+    private var tier: CompressionTier { CompressionTier(rawValue: tierRawValue) ?? .balanced }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -29,13 +33,8 @@ struct CompressOnlyView: View {
                     .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
 
                 if isCompressing {
-                    VStack(spacing: 10) {
-                        ProgressView(value: compressionService.progress)
-                            .tint(Theme.accent)
-                        Button("Cancel", role: .destructive) {
-                            compressionService.cancel()
-                        }
-                        .font(.subheadline)
+                    CompressProgressView(progress: compressionService.progress) {
+                        compressionService.cancel()
                     }
                 } else if didSave, let compressedSizeBytes, let originalSizeBytes {
                     sizeCompare(before: originalSizeBytes, after: compressedSizeBytes)
@@ -55,17 +54,7 @@ struct CompressOnlyView: View {
                         }
                     }
 
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Enhance quality").font(.subheadline.weight(.semibold))
-                            Text("Higher-bitrate encode").font(.caption2).foregroundStyle(Theme.inkSoft)
-                        }
-                        Spacer()
-                        Toggle("", isOn: $enhanceQuality).labelsHidden().tint(Theme.accent)
-                    }
-                    .padding(12)
-                    .background(Theme.surface2)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    qualityPicker
 
                     Button {
                         Task { await compress() }
@@ -127,9 +116,28 @@ struct CompressOnlyView: View {
         })
         .onAppear {
             guard player == nil, let initialURL else { return }
-            importedVideoURL = initialURL
-            player = AVPlayer(url: initialURL)
-            originalSizeBytes = fileSize(at: initialURL)
+            load(url: initialURL)
+        }
+    }
+
+    private var qualityPicker: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Picker("Quality", selection: $tierRawValue) {
+                ForEach(CompressionTier.allCases) { tier in
+                    Text(tier.label).tag(tier.rawValue)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            if let sourceDurationSeconds {
+                let estimate = FFmpegCommandBuilder.estimatedOutputBytes(durationSeconds: sourceDurationSeconds, tier: tier)
+                HStack(spacing: 6) {
+                    Image(systemName: "shippingbox").font(.caption2).foregroundStyle(Theme.inkSoft)
+                    Text("Estimated size: ~\(ByteFormatting.humanReadableSize(estimate))")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.inkSoft)
+                }
+            }
         }
     }
 
@@ -211,12 +219,19 @@ struct CompressOnlyView: View {
         resetState()
         switch result {
         case .success(let picked):
-            importedVideoURL = picked.url
             importedAssetIdentifier = picked.assetIdentifier
-            player = AVPlayer(url: picked.url)
-            originalSizeBytes = fileSize(at: picked.url)
+            load(url: picked.url)
         case .failure(let error):
             errorMessage = error.localizedDescription
+        }
+    }
+
+    private func load(url: URL) {
+        importedVideoURL = url
+        player = AVPlayer(url: url)
+        originalSizeBytes = fileSize(at: url)
+        Task {
+            sourceDurationSeconds = try? await compressionService.videoDurationSeconds(url: url)
         }
     }
 
@@ -225,11 +240,16 @@ struct CompressOnlyView: View {
         isCompressing = true
         defer { isCompressing = false }
 
+        // Best-effort: ask iOS for extra time so compression keeps going if the user
+        // backgrounds the app mid-encode, instead of being suspended immediately.
+        let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "compress-video")
+        defer { UIApplication.shared.endBackgroundTask(backgroundTask) }
+
         let outputURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("compressed-\(UUID().uuidString)")
             .appendingPathExtension("mp4")
         do {
-            try await compressionService.compress(inputURL: importedVideoURL, outputURL: outputURL, enhanceQuality: enhanceQuality)
+            try await compressionService.compress(inputURL: importedVideoURL, outputURL: outputURL, tier: tier)
             let resultBytes = fileSize(at: outputURL)
             compressedSizeBytes = resultBytes
             try await PhotoLibrarySaver.save(videoURL: outputURL)
@@ -256,6 +276,7 @@ struct CompressOnlyView: View {
         importedAssetIdentifier = nil
         player = nil
         originalSizeBytes = nil
+        sourceDurationSeconds = nil
         compressedSizeBytes = nil
         didSave = false
         didDeleteOriginal = false
@@ -267,6 +288,68 @@ struct CompressOnlyView: View {
             return nil
         }
         return attributes[.size] as? Int64
+    }
+}
+
+/// Mirrors the visual language of ProcessingView (Cut silence & retakes) so both
+/// long-running tools feel consistent, even though Compress is a single ffmpeg pass
+/// rather than a multi-stage pipeline - the steps here are progress bands, not real
+/// separate phases.
+private struct CompressProgressView: View {
+    let progress: Double
+    let onCancel: () -> Void
+
+    private var steps: [(title: String, threshold: Double)] {
+        [("Preparing video", 0.05), ("Encoding to HEVC", 0.9), ("Finishing up", 1.0)]
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("\(Int(progress * 100))%")
+                    .font(Theme.displayFont(20))
+                    .foregroundStyle(Theme.accent)
+                Spacer()
+                Button("Cancel", role: .destructive, action: onCancel)
+                    .font(.caption)
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Theme.surface2)
+                    Capsule().fill(Theme.accent).frame(width: geo.size.width * progress)
+                }
+            }
+            .frame(height: 6)
+
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                    let previousThreshold = index == 0 ? 0 : steps[index - 1].threshold
+                    let isDone = progress >= step.threshold
+                    let isActive = progress >= previousThreshold && !isDone
+                    HStack(spacing: 10) {
+                        ZStack {
+                            if isDone {
+                                Circle().fill(Theme.accent)
+                                Image(systemName: "checkmark").font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.accentInk)
+                            } else if isActive {
+                                ProgressView().scaleEffect(0.6)
+                            } else {
+                                Circle().fill(Theme.paper).overlay(Circle().stroke(Theme.line))
+                            }
+                        }
+                        .frame(width: 18, height: 18)
+                        Text(step.title)
+                            .font(.caption)
+                            .foregroundStyle(isDone || isActive ? Theme.ink : Theme.inkSoft)
+                            .fontWeight(isDone || isActive ? .semibold : .regular)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Theme.surface2)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
     }
 }
 

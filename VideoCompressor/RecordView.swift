@@ -7,8 +7,10 @@ import AVKit
 struct RecordView: View {
     private enum Stage { case setup, ready, recording, reviewing }
 
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var recorder = CameraRecorder()
     @State private var stage: Stage = .setup
+    @State private var isStartingCamera = false
     @State private var script = ""
     @State private var fontSize: CGFloat = 22
     @State private var scrollSpeed: Double = 8
@@ -28,10 +30,20 @@ struct RecordView: View {
                         .padding(.horizontal, 18)
                         .padding(.top, 70)
                 }
+                if isStartingCamera {
+                    ProgressView().tint(.white)
+                }
                 VStack {
                     HStack {
                         statusBadge
                         Spacer()
+                        Button {
+                            forceClose()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.white, .black.opacity(0.4))
+                        }
                     }
                     Spacer()
                     if stage == .recording {
@@ -69,7 +81,10 @@ struct RecordView: View {
         }, message: {
             Text(recorder.errorMessage ?? "")
         })
-        .onDisappear { recorder.stopSession() }
+        .onDisappear {
+            if recorder.isRecording { recorder.stop() }
+            recorder.stopSession()
+        }
     }
 
     @ViewBuilder
@@ -223,8 +238,16 @@ struct RecordView: View {
     private func allowCamera() async {
         let granted = await recorder.requestAccessAndConfigure()
         guard granted else { return }
-        recorder.startSession()
+        isStartingCamera = true
+        await recorder.startSession()
+        isStartingCamera = false
         stage = .ready
+    }
+
+    private func forceClose() {
+        if recorder.isRecording { recorder.stop() }
+        Task { await recorder.stopSession() }
+        dismiss()
     }
 
     private func startRecording() {
@@ -256,8 +279,12 @@ struct RecordView: View {
     private func recordAgain() {
         recordedURL = nil
         player = nil
-        stage = .ready
-        recorder.startSession()
+        Task {
+            isStartingCamera = true
+            await recorder.startSession()
+            isStartingCamera = false
+            stage = .ready
+        }
     }
 
     private func startElapsedTimer() {

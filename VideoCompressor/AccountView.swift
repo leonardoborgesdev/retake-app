@@ -6,7 +6,7 @@ struct AccountView: View {
 
     @State private var apiKey: String = APIKeyStore.load() ?? ""
     @State private var savedConfirmation = false
-    @AppStorage("enhanceQuality") private var enhanceQuality = true
+    @AppStorage("compressionTier") private var tierRawValue = CompressionTier.balanced.rawValue
 
     var body: some View {
         Form {
@@ -57,12 +57,11 @@ struct AccountView: View {
 
             Section("Editing") {
                 HStack {
-                    Text("Compression preset")
+                    Text("Default compression quality")
                     Spacer()
-                    Text("Balanced").foregroundStyle(Theme.inkSoft)
+                    Text((CompressionTier(rawValue: tierRawValue) ?? .balanced).label)
+                        .foregroundStyle(Theme.inkSoft)
                 }
-                Toggle("Enhance quality by default", isOn: $enhanceQuality)
-                    .tint(Theme.accent)
             }
 
             Section("About") {

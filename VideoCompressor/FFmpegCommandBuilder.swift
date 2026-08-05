@@ -33,7 +33,11 @@ enum FFmpegCommandBuilder {
     /// ffmpeg-kit-spm build we ship is the GPL-free "min" variant, which does not include
     /// libx264/libx265. hevc_videotoolbox is also faster and more battery-efficient.
     static func compressionArguments(inputPath: String, outputPath: String, tier: CompressionTier) -> String {
-        "-y -i \"\(inputPath)\" -c:v hevc_videotoolbox -b:v \(tier.bitrateKbps)k -c:a copy -tag:v hvc1 \"\(outputPath)\""
+        // -realtime is an AVOption compiled into the videotoolbox encoder itself (unlike
+        // -vf filters, which are separate libavfilter modules this "min" build strips) -
+        // it tells VideoToolbox to prefer the fastest path the iPhone's hardware media
+        // engine has over its default balanced mode.
+        "-y -i \"\(inputPath)\" -c:v hevc_videotoolbox -b:v \(tier.bitrateKbps)k -realtime 1 -c:a copy -tag:v hvc1 \"\(outputPath)\""
     }
 
     /// Rough size estimate shown before compressing: video bitrate over the source

@@ -24,6 +24,17 @@ final class FFmpegCommandBuilderTests: XCTestCase {
         XCTAssertTrue(command.contains("-tag:v hvc1"))
     }
 
+    func test_compressionArguments_requestsFastestEncoderPath() {
+        // -realtime is a videotoolbox encoder AVOption (compiled in, not a filter
+        // module), unlike hqdn3d/unsharp/scale which crashed this app before.
+        let command = FFmpegCommandBuilder.compressionArguments(
+            inputPath: "/tmp/input.mov",
+            outputPath: "/tmp/output.mp4",
+            tier: .balanced
+        )
+        XCTAssertTrue(command.contains("-realtime 1"))
+    }
+
     func test_compressionArguments_neverUsesFilterGraph() {
         // The ffmpeg-kit-spm "min" build has no libavfilter modules on device
         // (confirmed: "-vf hqdn3d..." and "-vf scale=..." both fail with

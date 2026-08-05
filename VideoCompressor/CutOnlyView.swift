@@ -2,6 +2,8 @@ import SwiftUI
 import AVKit
 
 struct CutOnlyView: View {
+    var initialURL: URL? = nil
+
     @EnvironmentObject private var historyStore: HistoryStore
 
     @State private var showPicker = false
@@ -96,6 +98,11 @@ struct CutOnlyView: View {
         }, message: {
             Text(errorMessage ?? "")
         })
+        .onAppear {
+            guard player == nil, let initialURL else { return }
+            importedVideoURL = initialURL
+            player = AVPlayer(url: initialURL)
+        }
     }
 
     private func handlePicked(_ result: Result<PickedVideo, Error>) {

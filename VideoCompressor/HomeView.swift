@@ -6,6 +6,16 @@ struct HomeView: View {
             Spacer()
 
             NavigationLink {
+                RecordView()
+            } label: {
+                FeatureCard(
+                    systemImage: "text.below.photo",
+                    title: "Record with teleprompter",
+                    subtitle: "Paste a script, read it while filming, then compress or cut."
+                )
+            }
+
+            NavigationLink {
                 CompressOnlyView()
             } label: {
                 FeatureCard(

@@ -2,6 +2,8 @@ import SwiftUI
 import AVKit
 
 struct CompressOnlyView: View {
+    var initialURL: URL? = nil
+
     @EnvironmentObject private var historyStore: HistoryStore
 
     @State private var showPicker = false
@@ -116,6 +118,12 @@ struct CompressOnlyView: View {
         }, message: {
             Text(errorMessage ?? "")
         })
+        .onAppear {
+            guard player == nil, let initialURL else { return }
+            importedVideoURL = initialURL
+            player = AVPlayer(url: initialURL)
+            originalSizeBytes = fileSize(at: initialURL)
+        }
     }
 
     private func sizeCompare(before: Int64, after: Int64) -> some View {

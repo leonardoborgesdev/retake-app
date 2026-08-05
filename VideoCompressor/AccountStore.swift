@@ -1,25 +1,16 @@
 import Foundation
-import CryptoKit
 import Security
 
-/// Local-only account store. There is no backend yet - this exists so the
-/// login/signup/account UI works end to end today. Credentials never leave
-/// the device; when a real backend is added, replace the body of
-/// signUp/logIn and keep the published session contract the same.
 struct AccountSession: Codable, Equatable {
     var name: String
     var email: String
 }
 
 enum AccountError: LocalizedError {
-    case emailInUse
-    case invalidCredentials
     case missingFields
 
     var errorDescription: String? {
         switch self {
-        case .emailInUse: return "An account with this email already exists."
-        case .invalidCredentials: return "Wrong email or password."
         case .missingFields: return "Fill in every field first."
         }
     }
@@ -30,8 +21,10 @@ final class AccountStore: ObservableObject {
     static let shared = AccountStore()
 
     @Published private(set) var session: AccountSession?
+    /// Set after signUp when the account needs email confirmation before it can log in.
+    @Published var pendingConfirmationEmail: String?
 
-    private let service = "com.automatrix.videocompressor.account"
+    private let service = "com.automatrix.videocompressor.supabase"
     private let sessionKey = "com.automatrix.videocompressor.session"
 
     private init() {
@@ -43,73 +36,63 @@ final class AccountStore: ObservableObject {
 
     var isLoggedIn: Bool { session != nil }
 
-    func signUp(name: String, email: String, password: String) throws {
+    func signUp(name: String, email: String, password: String) async throws {
         let email = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty, !email.isEmpty, !password.isEmpty else { throw AccountError.missingFields }
-        guard readPasswordHash(email: email) == nil else { throw AccountError.emailInUse }
 
-        try storePasswordHash(email: email, password: password)
-        UserDefaults.standard.set(name, forKey: nameKey(for: email))
-        setSession(AccountSession(name: name, email: email))
+        guard let supabaseSession = try await SupabaseAuthClient.signUp(name: name, email: email, password: password) else {
+            pendingConfirmationEmail = email
+            return
+        }
+        applySession(supabaseSession)
     }
 
-    func logIn(email: String, password: String) throws {
+    func logIn(email: String, password: String) async throws {
         let email = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         guard !email.isEmpty, !password.isEmpty else { throw AccountError.missingFields }
-        guard let storedHash = readPasswordHash(email: email), storedHash == hash(password) else {
-            throw AccountError.invalidCredentials
-        }
-        let name = UserDefaults.standard.string(forKey: nameKey(for: email)) ?? email
-        setSession(AccountSession(name: name, email: email))
+
+        let supabaseSession = try await SupabaseAuthClient.logIn(email: email, password: password)
+        applySession(supabaseSession)
     }
 
     func signOut() {
         session = nil
         UserDefaults.standard.removeObject(forKey: sessionKey)
+        deleteTokens()
     }
 
-    private func setSession(_ session: AccountSession) {
-        self.session = session
-        if let data = try? JSONEncoder().encode(session) {
+    private func applySession(_ supabaseSession: SupabaseSession) {
+        pendingConfirmationEmail = nil
+        let account = AccountSession(name: supabaseSession.name, email: supabaseSession.email)
+        session = account
+        if let data = try? JSONEncoder().encode(account) {
             UserDefaults.standard.set(data, forKey: sessionKey)
         }
+        storeTokens(supabaseSession)
     }
 
-    private func nameKey(for email: String) -> String { "name-\(email)" }
+    // MARK: - Token storage (Keychain)
 
-    private func hash(_ password: String) -> String {
-        let digest = SHA256.hash(data: Data(password.utf8))
-        return digest.map { String(format: "%02x", $0) }.joined()
-    }
-
-    private func storePasswordHash(email: String, password: String) throws {
+    private func storeTokens(_ supabaseSession: SupabaseSession) {
+        guard let data = try? JSONEncoder().encode(supabaseSession) else { return }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: email,
+            kSecAttrAccount as String: "tokens",
         ]
         SecItemDelete(query as CFDictionary)
-
         var attributes = query
-        attributes[kSecValueData as String] = Data(hash(password).utf8)
-        let status = SecItemAdd(attributes as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            throw NSError(domain: "AccountStore", code: Int(status), userInfo: [NSLocalizedDescriptionKey: "Could not save the account to the Keychain."])
-        }
+        attributes[kSecValueData as String] = data
+        SecItemAdd(attributes as CFDictionary, nil)
     }
 
-    private func readPasswordHash(email: String) -> String? {
+    private func deleteTokens() {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: email,
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecAttrAccount as String: "tokens",
         ]
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        guard status == errSecSuccess, let data = result as? Data else { return nil }
-        return String(data: data, encoding: .utf8)
+        SecItemDelete(query as CFDictionary)
     }
 }

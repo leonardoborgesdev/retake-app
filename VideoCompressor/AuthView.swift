@@ -9,11 +9,32 @@ struct AuthView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var errorMessage: String?
+    @State private var isSubmitting = false
 
     var body: some View {
         VStack(spacing: 20) {
             Spacer(minLength: 12)
             AppMark(size: 44)
+
+            if let pendingEmail = accountStore.pendingConfirmationEmail {
+                confirmationPending(email: pendingEmail)
+            } else {
+                form
+            }
+
+            Spacer()
+        }
+        .padding(24)
+        .background(Theme.paper)
+        .alert("Could not continue", isPresented: .constant(errorMessage != nil), actions: {
+            Button("OK") { errorMessage = nil }
+        }, message: {
+            Text(errorMessage ?? "")
+        })
+    }
+
+    private var form: some View {
+        VStack(spacing: 20) {
             Text(mode == .logIn ? "Welcome back." : "Create account.")
                 .font(Theme.displayFont(20))
 
@@ -33,15 +54,22 @@ struct AuthView: View {
             }
 
             Button {
-                submit()
+                Task { await submit() }
             } label: {
-                Text(mode == .logIn ? "Log in" : "Create account")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Theme.board)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                Group {
+                    if isSubmitting {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text(mode == .logIn ? "Log in" : "Create account")
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .background(Theme.board)
+                .foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
             }
+            .disabled(isSubmitting)
 
             HStack {
                 Rectangle().fill(Theme.line).frame(height: 1)
@@ -50,7 +78,6 @@ struct AuthView: View {
             }
 
             Button {
-                // No backend yet - Sign in with Apple will be wired once accounts move server-side.
                 errorMessage = "Sign in with Apple is not connected yet."
             } label: {
                 Label("Continue with Apple", systemImage: "apple.logo")
@@ -59,16 +86,33 @@ struct AuthView: View {
                     .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
                     .foregroundStyle(Theme.ink)
             }
-
-            Spacer()
         }
-        .padding(24)
-        .background(Theme.paper)
-        .alert("Could not continue", isPresented: .constant(errorMessage != nil), actions: {
-            Button("OK") { errorMessage = nil }
-        }, message: {
-            Text(errorMessage ?? "")
-        })
+    }
+
+    private func confirmationPending(email: String) -> some View {
+        VStack(spacing: 14) {
+            Image(systemName: "envelope.badge.fill")
+                .font(.system(size: 34))
+                .foregroundStyle(Theme.accent)
+            Text("Check your email").font(Theme.displayFont(18))
+            Text("We sent a confirmation link to \(email). Tap it, then log in below.")
+                .font(.subheadline)
+                .foregroundStyle(Theme.inkSoft)
+                .multilineTextAlignment(.center)
+
+            Button {
+                accountStore.pendingConfirmationEmail = nil
+                mode = .logIn
+                self.email = email
+            } label: {
+                Text("Back to log in")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Theme.board)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+            }
+        }
     }
 
     private func field(label: String, text: Binding<String>, placeholder: String, keyboard: UIKeyboardType = .default, isSecure: Bool = false, capitalization: TextInputAutocapitalization = .never) -> some View {
@@ -92,13 +136,15 @@ struct AuthView: View {
         }
     }
 
-    private func submit() {
+    private func submit() async {
+        isSubmitting = true
+        defer { isSubmitting = false }
         do {
             switch mode {
             case .logIn:
-                try accountStore.logIn(email: email, password: password)
+                try await accountStore.logIn(email: email, password: password)
             case .signUp:
-                try accountStore.signUp(name: name, email: email, password: password)
+                try await accountStore.signUp(name: name, email: email, password: password)
             }
         } catch {
             errorMessage = error.localizedDescription

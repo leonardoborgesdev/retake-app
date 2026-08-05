@@ -1,50 +1,38 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var showSettings = false
-
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 16) {
-                Spacer()
+        VStack(spacing: 16) {
+            Spacer()
 
-                NavigationLink {
-                    CompressOnlyView()
-                } label: {
-                    FeatureCard(
-                        systemImage: "arrow.down.right.and.arrow.up.left",
-                        title: "Comprimir vídeo",
-                        subtitle: "Reduz o tamanho do arquivo mantendo a qualidade, usando o encoder de hardware do iPhone."
-                    )
-                }
+            NavigationLink {
+                CompressOnlyView()
+            } label: {
+                FeatureCard(
+                    systemImage: "arrow.down.right.and.arrow.up.left",
+                    title: "Compress video",
+                    subtitle: "Smaller file, sharper result — on-device, no upload."
+                )
+            }
 
-                NavigationLink {
-                    CutOnlyView()
-                } label: {
-                    FeatureCard(
-                        systemImage: "scissors",
-                        title: "Cortar silêncios e retakes",
-                        subtitle: "Remove pausas longas e repetições de fala automaticamente (usa a AssemblyAI, precisa de internet)."
-                    )
-                }
+            NavigationLink {
+                CutOnlyView()
+            } label: {
+                FeatureCard(
+                    systemImage: "scissors",
+                    title: "Cut silence & retakes",
+                    subtitle: "Finds dead air and repeated lines. You pick the take."
+                )
+            }
 
-                Spacer()
-                Spacer()
-            }
-            .padding()
-            .navigationTitle("VideoCompressor")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                }
-            }
-            .sheet(isPresented: $showSettings) {
-                SettingsView()
-            }
+            Spacer()
+            Spacer()
+        }
+        .padding()
+        .background(Theme.paper)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) { Wordmark(size: 17, color: Theme.ink) }
         }
     }
 }
@@ -57,29 +45,32 @@ private struct FeatureCard: View {
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: systemImage)
-                .font(.system(size: 32))
-                .frame(width: 44)
-                .foregroundStyle(Color.accentColor)
+                .font(.system(size: 30))
+                .frame(width: 40, height: 40)
+                .background(Theme.board)
+                .foregroundStyle(Theme.accent)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
                 Text(subtitle)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.inkSoft)
             }
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(Theme.inkSoft)
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
-        .foregroundStyle(.primary)
+        .background(Theme.surface2)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+        .foregroundStyle(Theme.ink)
     }
 }
 
 #Preview {
-    HomeView()
+    NavigationStack { HomeView() }.environmentObject(HistoryStore.shared).environmentObject(AccountStore.shared)
 }

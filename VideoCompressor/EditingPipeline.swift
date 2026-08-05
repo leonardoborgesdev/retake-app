@@ -23,6 +23,8 @@ final class EditingPipeline: ObservableObject {
     private var lastEditedURL: URL?
     private var client: AssemblyAIClient?
 
+    var cutCount: Int { cuts.count }
+
     func run(sourceURL: URL) async -> URL? {
         self.sourceURL = sourceURL
         do {

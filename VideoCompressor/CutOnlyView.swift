@@ -2,6 +2,8 @@ import SwiftUI
 import AVKit
 
 struct CutOnlyView: View {
+    @EnvironmentObject private var historyStore: HistoryStore
+
     @State private var showPicker = false
     @State private var importedVideoURL: URL?
     @State private var player: AVPlayer?
@@ -12,53 +14,63 @@ struct CutOnlyView: View {
     @StateObject private var editingPipeline = EditingPipeline()
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             if let player {
                 VideoPlayer(player: player)
-                    .frame(height: 220)
+                    .frame(height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
 
                 if editingPipeline.stage != .idle && editingPipeline.stage != .done {
-                    editingProgressView
+                    ProcessingView(stage: editingPipeline.stage)
                 } else if isSaving {
                     ProgressView()
-                    Text("Salvando na galeria…")
+                    Text("Saving to Photos...")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.inkSoft)
                 } else if didSave {
-                    Label("Salvo na galeria", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                    Label("Saved to Photos", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(Theme.accent)
                         .font(.headline)
                 } else {
-                    Button("Cortar silêncios e retakes") {
+                    Button {
                         Task { await runEditingPipeline() }
+                    } label: {
+                        Text("Cut silence & retakes")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Theme.board)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
-                    .buttonStyle(.borderedProminent)
                 }
             } else {
-                Spacer()
                 VStack(spacing: 12) {
                     Image(systemName: "scissors")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.secondary)
-                    Text("Nenhum vídeo selecionado")
+                        .font(.system(size: 40))
+                        .foregroundStyle(Theme.inkSoft)
+                    Text("No video selected")
                         .font(.headline)
-                    Text("Importe um vídeo pra cortar silêncios e repetições de fala.")
+                    Text("Import a video to cut silence and repeated lines.")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.inkSoft)
                         .multilineTextAlignment(.center)
                 }
+                .padding(.top, 48)
                 Spacer()
             }
 
             Button {
                 showPicker = true
             } label: {
-                Label("Importar vídeo", systemImage: "photo.on.rectangle")
+                Label("Import video", systemImage: "photo.on.rectangle")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 11)
+                    .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
             }
-            .buttonStyle(.bordered)
         }
         .padding()
-        .navigationTitle("Cortar silêncios e retakes")
+        .background(Theme.paper)
+        .navigationTitle("Cut silence & retakes")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {
             VideoPicker { result in
@@ -79,40 +91,19 @@ struct CutOnlyView: View {
                 }
             }
         }
-        .alert("Erro", isPresented: .constant(errorMessage != nil), actions: {
+        .alert("Error", isPresented: .constant(errorMessage != nil), actions: {
             Button("OK") { errorMessage = nil }
         }, message: {
             Text(errorMessage ?? "")
         })
     }
 
-    private var editingProgressView: some View {
-        VStack(spacing: 8) {
-            ProgressView()
-            Text(stageDescription(editingPipeline.stage))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    private func stageDescription(_ stage: EditingStage) -> String {
-        switch stage {
-        case .idle, .done: return ""
-        case .transcribingOriginal: return "Transcrevendo áudio original…"
-        case .detectingSilence: return "Detectando silêncios…"
-        case .renderingCuts: return "Cortando vídeo…"
-        case .extractingAudioForQA: return "Extraindo áudio pra conferência…"
-        case .transcribingEdited: return "Re-transcrevendo pra checar repetições…"
-        case .reviewingRetakes: return "Aguardando sua revisão…"
-        }
-    }
-
-    private func handlePicked(_ result: Result<URL, Error>) {
+    private func handlePicked(_ result: Result<PickedVideo, Error>) {
         resetState()
         switch result {
-        case .success(let url):
-            importedVideoURL = url
-            player = AVPlayer(url: url)
+        case .success(let picked):
+            importedVideoURL = picked.url
+            player = AVPlayer(url: picked.url)
         case .failure(let error):
             errorMessage = error.localizedDescription
         }
@@ -121,26 +112,33 @@ struct CutOnlyView: View {
     private func runEditingPipeline() async {
         guard let importedVideoURL else { return }
         if let result = await editingPipeline.run(sourceURL: importedVideoURL) {
-            await save(url: result)
+            await save(url: result, sourceName: importedVideoURL.lastPathComponent)
         } else if let message = editingPipeline.errorMessage {
             errorMessage = message
         }
     }
 
     private func resolveRetakes(keepFirstIDs: Set<Int>) async {
+        let sourceName = importedVideoURL?.lastPathComponent ?? "video.mov"
         if let result = await editingPipeline.resolveRetakes(keepingFirst: keepFirstIDs) {
-            await save(url: result)
+            await save(url: result, sourceName: sourceName)
         } else if let message = editingPipeline.errorMessage {
             errorMessage = message
         }
     }
 
-    private func save(url: URL) async {
+    private func save(url: URL, sourceName: String) async {
         isSaving = true
         defer { isSaving = false }
         do {
             try await PhotoLibrarySaver.save(videoURL: url)
             didSave = true
+            let cutCount = editingPipeline.cutCount
+            historyStore.record(HistoryEntry(
+                filename: sourceName,
+                kind: .cut,
+                resultTag: "\(cutCount) cut\(cutCount == 1 ? "" : "s")"
+            ))
             try? FileManager.default.removeItem(at: url)
         } catch {
             errorMessage = error.localizedDescription
@@ -156,5 +154,5 @@ struct CutOnlyView: View {
 }
 
 #Preview {
-    NavigationStack { CutOnlyView() }
+    NavigationStack { CutOnlyView() }.environmentObject(HistoryStore.shared)
 }

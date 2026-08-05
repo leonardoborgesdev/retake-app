@@ -13,11 +13,11 @@ enum AssemblyAIError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingAPIKey:
-            return "Configure sua chave de API da AssemblyAI nas configurações antes de continuar."
+            return "Set your AssemblyAI API key in Settings before continuing."
         case .invalidResponse:
-            return "Resposta inválida da AssemblyAI."
+            return "Invalid response from AssemblyAI."
         case .transcriptionFailed(let message):
-            return "Falha na transcrição: \(message)"
+            return "Transcription failed: \(message)"
         }
     }
 }

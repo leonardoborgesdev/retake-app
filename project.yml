@@ -10,10 +10,14 @@ settings:
   base:
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
-    DEVELOPMENT_TEAM: 4A4U3J9F55
+    DEVELOPMENT_TEAM: H5XDAAVPGT
     GENERATE_INFOPLIST_FILE: YES
     INFOPLIST_KEY_UILaunchScreen_Generation: YES
-    INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "Precisamos salvar o vídeo comprimido na sua galeria de fotos."
+    INFOPLIST_KEY_CFBundleDisplayName: "retake."
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "Used to save your compressed or edited video back to your library."
+    INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Used only to delete the original video when you explicitly choose to, after compressing it."
+    DEVELOPMENT_LANGUAGE: en
     MARKETING_VERSION: "1.0"
     CURRENT_PROJECT_VERSION: "1"
 packages:

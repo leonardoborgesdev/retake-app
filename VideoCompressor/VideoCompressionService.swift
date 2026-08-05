@@ -9,9 +9,9 @@ enum VideoCompressionError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .ffmpegFailed(let message):
-            return "Falha ao comprimir o vídeo: \(message)"
+            return "Failed to compress the video: \(message)"
         case .cancelled:
-            return "Compressão cancelada."
+            return "Compression cancelled."
         }
     }
 }
@@ -22,12 +22,13 @@ final class VideoCompressionService: ObservableObject {
 
     private var currentSession: FFmpegSession?
 
-    func compress(inputURL: URL, outputURL: URL) async throws {
+    func compress(inputURL: URL, outputURL: URL, enhanceQuality: Bool) async throws {
         progress = 0
         let durationSeconds = try await videoDurationSeconds(url: inputURL)
         let command = FFmpegCommandBuilder.compressionArguments(
             inputPath: inputURL.path,
-            outputPath: outputURL.path
+            outputPath: outputURL.path,
+            enhanceQuality: enhanceQuality
         )
 
         let buffer = FFmpegLogBuffer()
@@ -37,7 +38,7 @@ final class VideoCompressionService: ObservableObject {
                 Task { @MainActor in
                     self?.currentSession = nil
                     guard let session else {
-                        continuation.resume(throwing: VideoCompressionError.ffmpegFailed("sessão inválida"))
+                        continuation.resume(throwing: VideoCompressionError.ffmpegFailed("invalid session"))
                         return
                     }
                     let returnCode = session.getReturnCode()
@@ -46,7 +47,7 @@ final class VideoCompressionService: ObservableObject {
                     } else if ReturnCode.isCancel(returnCode) {
                         continuation.resume(throwing: VideoCompressionError.cancelled)
                     } else {
-                        let trace = session.getFailStackTrace() ?? buffer.lastLines(5) ?? "erro desconhecido"
+                        let trace = session.getFailStackTrace() ?? buffer.lastLines(5) ?? "unknown error"
                         continuation.resume(throwing: VideoCompressionError.ffmpegFailed(trace))
                     }
                 }

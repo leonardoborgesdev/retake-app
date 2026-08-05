@@ -4,7 +4,9 @@ import SwiftUI
 struct VideoCompressorApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            RootView()
+                .environmentObject(AccountStore.shared)
+                .environmentObject(HistoryStore.shared)
         }
     }
 }

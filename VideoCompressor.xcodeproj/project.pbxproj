@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01C194020EB44DD8AAC6ED94 /* HistoryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E064C406655C144129016A /* HistoryDetailView.swift */; };
 		07D041477DB6446BC3104AF3 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE5A2C23BF287B10DA539D2 /* Theme.swift */; };
 		0837BA5ED4E37D99697E0E33 /* PhotoLibrarySaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6746FDC4F1B0D624578997 /* PhotoLibrarySaver.swift */; };
 		0D9D50E8551C0B124ABC847B /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E7515A20B6903B75893B7AA /* RootTabView.swift */; };
@@ -51,6 +52,7 @@
 		D748E2CE3F15B8F02EC51B37 /* SilenceDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1080CA56E40BB94CBDBCA47E /* SilenceDetectorTests.swift */; };
 		E27F316DF99D302A5BA240D4 /* SilenceCutPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006D960F2F644AEE9040068 /* SilenceCutPlanner.swift */; };
 		E4500B24E78A97AD9205D331 /* TranscriptQATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329399A27CBE1830C01E9079 /* TranscriptQATests.swift */; };
+		F232E0206F01E95E282157BB /* FeatureInfoCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F764296A8C85461323ED0A /* FeatureInfoCard.swift */; };
 		FCFD6233DD90C7F083C8BF52 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0E69571BC68C180E4D141C2 /* RootView.swift */; };
 		FF88DC0BB1DA4AE6488FB0A1 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27DF24B6994634E6D04ADCBF /* AuthView.swift */; };
 /* End PBXBuildFile section */
@@ -114,7 +116,9 @@
 		C076F62F0F92DA37C0C23A4A /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		C38E4DEAC06D289B64E8F4E5 /* VideoCompressionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCompressionService.swift; sourceTree = "<group>"; };
 		C8C08E225EDC2BD92B5DC49E /* FFmpegCommandBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFmpegCommandBuilderTests.swift; sourceTree = "<group>"; };
+		C8E064C406655C144129016A /* HistoryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryDetailView.swift; sourceTree = "<group>"; };
 		C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditingPipeline.swift; sourceTree = "<group>"; };
+		D1F764296A8C85461323ED0A /* FeatureInfoCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureInfoCard.swift; sourceTree = "<group>"; };
 		D7BCE6D1E77D8CFBC5AE7461 /* SilenceCutPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceCutPlannerTests.swift; sourceTree = "<group>"; };
 		DF6278585CBFE5CF58CF6936 /* TranscriptQA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptQA.swift; sourceTree = "<group>"; };
 		E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFmpegLogBuffer.swift; sourceTree = "<group>"; };
@@ -167,8 +171,10 @@
 				33FFA899722E61FB12953DF5 /* CutRenderer.swift */,
 				EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */,
 				C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */,
+				D1F764296A8C85461323ED0A /* FeatureInfoCard.swift */,
 				3ED02434687B8E2A7A767695 /* FFmpegCommandBuilder.swift */,
 				E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */,
+				C8E064C406655C144129016A /* HistoryDetailView.swift */,
 				6D3084A2AA6CA8814428898E /* HistoryStore.swift */,
 				9A139C9ABBEDA8B328BAD133 /* HistoryView.swift */,
 				5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */,
@@ -332,6 +338,8 @@
 				C30584796CD41088C3F722B7 /* EditingPipeline.swift in Sources */,
 				5936AE489A3DFD9BB023F164 /* FFmpegCommandBuilder.swift in Sources */,
 				A93278994F1C049DCDDE29CE /* FFmpegLogBuffer.swift in Sources */,
+				F232E0206F01E95E282157BB /* FeatureInfoCard.swift in Sources */,
+				01C194020EB44DD8AAC6ED94 /* HistoryDetailView.swift in Sources */,
 				CEDF7ED120F8F47873840E3A /* HistoryStore.swift in Sources */,
 				9205BFD939C4B7215C9CDB7E /* HistoryView.swift in Sources */,
 				2E996FF9196E49CC53DB2C10 /* HomeView.swift in Sources */,

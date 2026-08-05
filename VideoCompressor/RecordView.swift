@@ -132,6 +132,13 @@ struct RecordView: View {
 
     private var setupControls: some View {
         VStack(spacing: 12) {
+            if stage == .setup {
+                FeatureInfoCard(rows: [
+                    .init(icon: "text.viewfinder", label: "What it does", value: "Scrolls your script over the camera"),
+                    .init(icon: "clock", label: "Takes about", value: "As long as your script needs"),
+                    .init(icon: "checkmark.seal", label: "Benefit", value: "No cue cards, no memorizing"),
+                ])
+            }
             VStack(alignment: .leading, spacing: 4) {
                 Text("SCRIPT").font(.caption2.weight(.semibold)).foregroundStyle(Theme.inkSoft)
                 TextEditor(text: $script)

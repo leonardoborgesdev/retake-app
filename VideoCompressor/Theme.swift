@@ -1,16 +1,20 @@
 import SwiftUI
 
 enum Theme {
-    static let ink = Color(hex: 0x0B0B0C)
-    static let paper = Color(white: 1.0)
-    static let surface2 = Color(hex: 0xF4F4F5)
-    static let surface3 = Color(hex: 0xECECED)
-    static let line = Color(hex: 0xDCDCE0)
-    static let inkSoft = Color(hex: 0x77777C)
-    static let accent = Color(hex: 0xE0982C)
+    static let ink = Color.adaptive(light: 0x0B0B0C, dark: 0xF2F2F3)
+    static let paper = Color.adaptive(light: 0xFFFFFF, dark: 0x111113)
+    static let surface2 = Color.adaptive(light: 0xF4F4F5, dark: 0x1B1B1E)
+    static let surface3 = Color.adaptive(light: 0xECECED, dark: 0x222226)
+    static let line = Color.adaptive(light: 0xDCDCE0, dark: 0x2D2D32)
+    static let inkSoft = Color.adaptive(light: 0x77777C, dark: 0x94949A)
+    static let accent = Color.adaptive(light: 0xE0982C, dark: 0xF0AB42)
+    /// Only ever used as text sitting on top of Theme.accent itself (e.g. buttons) -
+    /// safe to keep a single dark value since the accent stays bright in both themes.
     static let accentInk = Color(hex: 0x2B1A03)
-    static let accentSoft = Color(hex: 0xF6E3C4)
+    static let accentSoft = Color.adaptive(light: 0xF6E3C4, dark: 0x3A2A10)
     static let discard = Color(hex: 0xC65B42)
+    /// Deliberately static near-black - the claquette "slate" used for the app mark,
+    /// splash, and onboarding, independent of the viewer's light/dark setting.
     static let board = Color(hex: 0x0A0A0B)
 
     static let cardRadius: CGFloat = 16
@@ -28,6 +32,23 @@ extension Color {
         let g = Double((hex >> 8) & 0xFF) / 255
         let b = Double(hex & 0xFF) / 255
         self.init(.sRGB, red: r, green: g, blue: b, opacity: opacity)
+    }
+
+    /// A color that switches between a light- and dark-appearance value automatically,
+    /// following the system (or the artifact's own theme toggle, when embedded).
+    static func adaptive(light: UInt32, dark: UInt32) -> Color {
+        Color(UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(hex: dark) : UIColor(hex: light)
+        })
+    }
+}
+
+private extension UIColor {
+    convenience init(hex: UInt32, opacity: CGFloat = 1) {
+        let r = CGFloat((hex >> 16) & 0xFF) / 255
+        let g = CGFloat((hex >> 8) & 0xFF) / 255
+        let b = CGFloat(hex & 0xFF) / 255
+        self.init(red: r, green: g, blue: b, alpha: opacity)
     }
 }
 

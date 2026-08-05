@@ -46,18 +46,25 @@ struct CutOnlyView: View {
                     }
                 }
             } else {
-                VStack(spacing: 12) {
-                    Image(systemName: "scissors")
-                        .font(.system(size: 40))
-                        .foregroundStyle(Theme.inkSoft)
-                    Text("No video selected")
-                        .font(.headline)
-                    Text("Import a video to cut silence and repeated lines.")
-                        .font(.subheadline)
-                        .foregroundStyle(Theme.inkSoft)
-                        .multilineTextAlignment(.center)
+                VStack(spacing: 20) {
+                    VStack(spacing: 12) {
+                        Image(systemName: "scissors")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Theme.inkSoft)
+                        Text("No video selected")
+                            .font(.headline)
+                        Text("Import a video to cut silence and repeated lines.")
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.inkSoft)
+                            .multilineTextAlignment(.center)
+                    }
+                    FeatureInfoCard(rows: [
+                        .init(icon: "waveform.badge.magnifyingglass", label: "What it does", value: "Transcribes, finds gaps & retakes"),
+                        .init(icon: "clock", label: "Takes about", value: "~1 min per minute of video"),
+                        .init(icon: "checkmark.seal", label: "Benefit", value: "No desktop edit, you pick the take"),
+                    ])
                 }
-                .padding(.top, 48)
+                .padding(.top, 32)
                 Spacer()
             }
 

@@ -21,23 +21,32 @@ struct HistoryView: View {
                 .padding()
             } else {
                 List(historyStore.entries) { entry in
-                    HStack(spacing: 12) {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(LinearGradient(colors: [Theme.surface3, Theme.board], startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: 36, height: 36)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(entry.filename).font(.subheadline.weight(.semibold))
-                            Text(entry.date.formatted(date: .abbreviated, time: .shortened))
-                                .font(.caption2)
-                                .foregroundStyle(Theme.inkSoft)
+                    NavigationLink {
+                        HistoryDetailView(entry: entry)
+                    } label: {
+                        HStack(spacing: 12) {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(LinearGradient(colors: [Theme.surface3, Theme.board], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 36, height: 36)
+                                .overlay(
+                                    Image(systemName: entry.kind == .compress ? "arrow.down.right.and.arrow.up.left" : "scissors")
+                                        .font(.caption)
+                                        .foregroundStyle(Theme.accent)
+                                )
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(entry.filename).font(.subheadline.weight(.semibold))
+                                Text(entry.date.formatted(date: .abbreviated, time: .shortened))
+                                    .font(.caption2)
+                                    .foregroundStyle(Theme.inkSoft)
+                            }
+                            Spacer()
+                            Text(entry.resultTag)
+                                .font(.caption2.monospaced().weight(.bold))
+                                .padding(.horizontal, 7).padding(.vertical, 3)
+                                .background(Theme.accentSoft)
+                                .foregroundStyle(Theme.accent)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
                         }
-                        Spacer()
-                        Text(entry.resultTag)
-                            .font(.caption2.monospaced().weight(.bold))
-                            .padding(.horizontal, 7).padding(.vertical, 3)
-                            .background(Theme.accentSoft)
-                            .foregroundStyle(Theme.accentInk)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                     .listRowBackground(Theme.surface2)
                 }

@@ -75,7 +75,7 @@ struct RetakeReviewView: View {
                     .font(.caption2.monospaced().weight(.bold))
                     .padding(.horizontal, 8).padding(.vertical, 3)
                     .background(Theme.accentSoft)
-                    .foregroundStyle(Theme.accentInk)
+                    .foregroundStyle(Theme.accent)
                     .clipShape(Capsule())
             } else {
                 Label("REMOVED", systemImage: "arrow.uturn.backward")

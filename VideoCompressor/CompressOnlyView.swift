@@ -79,18 +79,25 @@ struct CompressOnlyView: View {
                     }
                 }
             } else {
-                VStack(spacing: 12) {
-                    Image(systemName: "video.badge.plus")
-                        .font(.system(size: 40))
-                        .foregroundStyle(Theme.inkSoft)
-                    Text("No video selected")
-                        .font(.headline)
-                    Text("Import a video from your library to compress it.")
-                        .font(.subheadline)
-                        .foregroundStyle(Theme.inkSoft)
-                        .multilineTextAlignment(.center)
+                VStack(spacing: 20) {
+                    VStack(spacing: 12) {
+                        Image(systemName: "video.badge.plus")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Theme.inkSoft)
+                        Text("No video selected")
+                            .font(.headline)
+                        Text("Import a video from your library to compress it.")
+                            .font(.subheadline)
+                            .foregroundStyle(Theme.inkSoft)
+                            .multilineTextAlignment(.center)
+                    }
+                    FeatureInfoCard(rows: [
+                        .init(icon: "wand.and.stars", label: "What it does", value: "Re-encodes to HEVC on-device"),
+                        .init(icon: "clock", label: "Takes about", value: "10–90s, depends on length"),
+                        .init(icon: "checkmark.seal", label: "Benefit", value: "Up to 80% smaller, same look"),
+                    ])
                 }
-                .padding(.top, 48)
+                .padding(.top, 32)
                 Spacer()
             }
 

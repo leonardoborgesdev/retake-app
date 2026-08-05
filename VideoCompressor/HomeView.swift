@@ -9,7 +9,7 @@ struct HomeView: View {
                 RecordView()
             } label: {
                 FeatureCard(
-                    systemImage: "text.below.photo",
+                    systemImage: "doc.text.viewfinder",
                     title: "Record with teleprompter",
                     subtitle: "Paste a script, read it while filming, then compress or cut."
                 )

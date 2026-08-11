@@ -5,3 +5,4 @@ xcuserdata/
 .DS_Store
 *.xcworkspace/xcuserdata/
 .env.opencode
+VideoCompressor/Secrets.swift

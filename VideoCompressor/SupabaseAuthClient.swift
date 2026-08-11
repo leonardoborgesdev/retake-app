@@ -1,8 +1,8 @@
 import Foundation
 
 /// Minimal REST client for Supabase Auth (GoTrue) - no SDK dependency, just the
-/// two endpoints retake. needs. Self-hosted instance, see docs/design-mockup.md
-/// for where it runs.
+/// two endpoints retake. needs. Points at whatever Supabase project you configure
+/// in `Secrets.swift` (see `Secrets.swift.example`) - self-hosted or hosted both work.
 enum SupabaseAuthError: LocalizedError {
     case server(String)
     case decodingFailed
@@ -73,8 +73,8 @@ struct SupabaseSession: Codable {
 }
 
 enum SupabaseAuthClient {
-    static let baseURL = URL(string: "https://supabase-retake.automatrixapps99x.win")!
-    static let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzgyMTUxMTY0LCJleHAiOjE5Mzk4MzExNjR9.5mQJDVI7TBn-tsn0J3Mz1Qm1HFjDApd38F58M0sLFdE"
+    static let baseURL = Secrets.supabaseURL
+    static let anonKey = Secrets.supabaseAnonKey
 
     /// Returns nil (not an error) when signup succeeded but the account needs email
     /// confirmation before it has a session - autoconfirm is off on this instance.

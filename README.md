@@ -1,34 +1,54 @@
 # retake.
 
-A native iOS app that compresses video on-device and cuts silence/retakes automatically — built for content creators who record on their iPhone and want to skip the desktop edit entirely.
+**On-device video compression with AI-powered retake detection.**
 
-## What it's for
+## Why this exists
 
-Two problems, one app:
-
-1. **Video compression** — iPhone video eats storage fast. `retake.` re-encodes to H.265/HEVC using the iPhone's own hardware encoder, entirely on-device. No upload, no server, no account required to use this part.
-2. **Silence & retake removal** — if you record yourself talking (tutorials, vlogs, Reels), you almost always stumble a line and say it twice, or leave dead air between sentences. `retake.` transcribes the audio, finds those gaps and repeated phrases, and lets you pick which take to keep — the kind of edit that normally means importing into a desktop NLE.
-
-## Who it's for
-
-Solo creators, podcasters, and anyone who films on an iPhone and edits nowhere — the target is "record → open retake. → post," no computer step in between.
-
-## Why it exists (market gap)
-
-- Video compressor apps on the App Store are common and undifferentiated (Video Compress, Panda Video Compressor, AniSmall, etc).
-- Silence-remover apps also exist on iOS (BlitzCut AI, AutoCut AI, Jumpcut).
-- **Retake detection** (catching a repeated/re-recorded line, not just silence) exists, but only as desktop plugins or web SaaS (AutoCut's Repeat feature, TimeBolt, Vizard, Cutback) — nothing native on iPhone.
-
-`retake.` is the first of those three to run natively on-device, with no upload step.
+Filming yourself on an iPhone means you almost always stumble a line, say it twice, or leave dead air between sentences — and finding the "good take" in a pile of raw footage afterward is tedious. Most video compressor apps on the App Store are undifferentiated, and the tools that actually catch repeated/re-recorded lines (not just silence) only exist as desktop plugins or web SaaS. `retake.` does both on-device: it shrinks the file and picks out the awkward parts, natively, with no upload step.
 
 ## Features
 
-- **Compress video** — HEVC re-encode via `hevc_videotoolbox` (hardware), with an optional "Enhance quality" toggle that raises the target bitrate for a visibly sharper result. Shows a before/after size comparison. Never modifies the original video.
-- **Cut silence & retakes** — pipeline: transcribe (AssemblyAI) → detect silence (ffmpeg `silencedetect`) → render cuts → re-transcribe the edit to catch repeated phrases → if a retake is found, the user picks which occurrence to keep in a dedicated review screen (waveform-style take comparison, "keep" vs "REMOVED ↩").
-- **Delete original from Photos** (optional, opt-in) — after compressing, offers to delete the source video to actually reclaim space. Works even under limited Photos access, using the identifier `PHPickerViewController` hands back for the item the user just picked.
-- **History** — every compress/cut run is logged locally (filename, date, result).
-- **Account** — local-only today (Keychain-backed email/password, no server). Structured so it can be swapped for a real backend later without changing the UI contract.
-- **Onboarding** — two-page demo (waveform with silence highlighted → trimmed result) shown once before the first login.
+- **On-device video compression** — re-encodes to H.265/HEVC using the iPhone's hardware encoder (`hevc_videotoolbox`), with real-time VideoToolbox mode for faster exports. No upload, no server, no account required.
+- **Silence & retake detection** — transcribes the audio, finds silence gaps and repeated phrases, and surfaces a review screen where you pick which take to keep. Implemented end-to-end; currently hidden from Home while compression is polished first (see Status).
+- **Delete original from Photos** (opt-in) — reclaim storage after compressing, without losing the source unless you choose to.
+- **Local run history** — every compress/cut session is logged on-device.
+- **Nine implemented screens** — splash, onboarding, auth, home, compress, processing, retake review, history, and account.
+- **Local-only auth** — the account flow runs entirely against the Keychain out of the box; no backend is required to build and run the app.
+
+## Tech stack
+
+- **Swift / SwiftUI**, iOS 16.0+, single Xcode project generated with [XcodeGen](https://github.com/yonaskolb/XcodeGen) from `project.yml`.
+- **[ffmpeg-kit-spm](https://github.com/tylerjonesio/ffmpeg-kit-spm)** (pinned `5.1.2`) for on-device encoding and silence detection — the GPL-free build, so hardware `hevc_videotoolbox` is used for encoding rather than `libx264`/`libx265`.
+- **AssemblyAI** (optional, bring-your-own-key) for transcription that powers the silence/retake pipeline. The key is pasted by the user in Account settings and stored in the Keychain; it never leaves the device except in the direct API call.
+- **PHPickerViewController** for video import — more reliable for large files, and the only way to get an `assetIdentifier` under limited library access.
+- No cloud dependency is required for the core features (compression, silence/retake detection, history). Supabase is wired up for auth but the app runs fully without it configured.
+
+## Setup
+
+Requires Xcode 16+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen).
+
+```bash
+xcodegen generate
+open VideoCompressor.xcodeproj
+```
+
+Auth is optional and only needed if you want to wire up a real Supabase backend for the account screen:
+
+```bash
+cp VideoCompressor/Secrets.swift.example VideoCompressor/Secrets.swift
+# then fill in your own Supabase project URL and anon key
+```
+
+`Secrets.swift` is gitignored. Without it configured, the app still builds and runs — compression, history, and the silence/retake pipeline don't touch it.
+
+To build from the command line:
+
+```bash
+xcodebuild -project VideoCompressor.xcodeproj -scheme VideoCompressor \
+  -destination "generic/platform=iOS" CODE_SIGNING_ALLOWED=NO build
+```
+
+To run on a physical device, open the project in Xcode, pick the device, and hit Run — first-run signing needs Xcode's own GUI to create the certificate.
 
 ## Screens
 
@@ -38,29 +58,15 @@ Real screenshots, iPhone 17 Simulator, iOS 26.5:
 |---|---|---|---|
 | ![onboarding](docs/screenshots/onboarding.png) | ![login](docs/screenshots/login.png) | ![home](docs/screenshots/home.png) | ![account](docs/screenshots/account.png) |
 
-Full visual identity reference (logo, palette, type, and every screen mocked up before implementation, including Compress and the retake picker): see `docs/design-mockup.md`.
-
-## Tech stack
-
-- **SwiftUI**, iOS 16.0+, single Xcode project generated with [XcodeGen](https://github.com/yonaskolb/XcodeGen) from `project.yml` (never edit `.xcodeproj` directly — edit `project.yml` and run `xcodegen generate`).
-- **[ffmpeg-kit-spm](https://github.com/tylerjonesio/ffmpeg-kit-spm)** (Swift Package, pinned `5.1.2`) — the GPL-free "min" build. It has no `libx264`/`libx265` (hence hardware `hevc_videotoolbox` for encoding) and **no libavfilter modules** (no `-vf` filters work on device — learned this the hard way, see `VideoCompressor/FFmpegCommandBuilder.swift`).
-- **AssemblyAI** (cloud) — transcription only, for the silence/retake feature. The user pastes their own API key in Account settings; it's stored in the iOS Keychain and never leaves the device except in the direct API call.
-- **PHPickerViewController** (not SwiftUI's `PhotosPicker`) — more reliable for large video files; also the only way to get `assetIdentifier` under limited library access for the delete-original feature.
-- No backend. Accounts, history, and settings are all local to the device today.
-
-## Compatible devices
-
-- iPhone only (`TARGETED_DEVICE_FAMILY = "1"`), iOS 16.0+.
-- Tested end-to-end on an iPhone 13 (physical device) and iPhone 17 Simulator.
-- Not tested on iPad; not tested on iOS versions below 16.
+Full visual identity reference (logo, palette, type, and every screen mocked up before implementation) is in `docs/design-mockup.md`.
 
 ## Project structure
 
 ```
 VideoCompressor/
-  Theme.swift              Design tokens, Wordmark, AppMark
-  RootView.swift            Splash -> Onboarding -> Auth -> RootTabView
-  RootTabView.swift          Home / History / Account tabs
+  Theme.swift                Design tokens, wordmark, app mark
+  RootView.swift              Splash -> Onboarding -> Auth -> RootTabView
+  RootTabView.swift            Home / History / Account tabs
   SplashView.swift / OnboardingView.swift / AuthView.swift
   HomeView.swift
   CompressOnlyView.swift + VideoCompressionService.swift + FFmpegCommandBuilder.swift
@@ -69,30 +75,28 @@ VideoCompressor/
   TranscriptQA.swift / RetakeCandidate.swift / AssemblyAIClient.swift
   AccountStore.swift / AccountView.swift / HistoryStore.swift / HistoryView.swift
   VideoPicker.swift / PhotoLibrarySaver.swift / APIKeyStore.swift
-VideoCompressorTests/       28 XCTest cases covering the pure-logic pipeline
+  SupabaseAuthClient.swift / Secrets.swift.example
+VideoCompressorTests/         28 XCTest cases covering the pure-logic pipeline
 docs/
-  design-mockup.md          Full visual identity + screen-by-screen spec
-  screenshots/               Real on-device/simulator screenshots
-STATUS.md                    Chronological engineering log (build issues, fixes, decisions)
+  design-mockup.md             Visual identity + screen-by-screen spec
+  screenshots/                  Simulator screenshots
 ```
 
-## Building
+## Status
 
-```bash
-xcodegen generate
-xcodebuild -project VideoCompressor.xcodeproj -scheme VideoCompressor \
-  -destination "generic/platform=iOS" CODE_SIGNING_ALLOWED=NO build
-```
+All 9 mockup screens are implemented and match the design spec. The build compiles cleanly and all 28 tests pass. It's been run and tested end-to-end in the iPhone 17 Simulator. Physical-device testing is still pending.
 
-To run on a physical device, open `VideoCompressor.xcodeproj` in Xcode, pick the device, and hit Run — the first run on a new Apple ID needs Xcode's own GUI to create the signing certificate (this cannot be done from the command line; a headless `xcodebuild` will fail with "No signing certificate ... found" even after the cert exists, because `codesign` needs an interactive Keychain access session to read the private key).
+Known limitations:
 
-## Known limitations / next steps
-
-- **No backend** — login/signup work but are local-only. Needed before this can be a real SaaS.
-- **Delete-original-from-Photos** and the **full cut/retake pipeline** haven't been verified end-to-end on a physical device with a real AssemblyAI key yet.
-- Compression presets and language settings are currently display-only (no real options behind them).
-- Not on the App Store — sideloaded via Xcode, free-tier provisioning profile expires after 7 days.
+- Home currently surfaces **Compress only** — Record (native camera + teleprompter) and Cut (silence/retake review) are fully implemented but temporarily hidden from the tab bar while compression is polished first. The underlying views and pipeline are untouched and easy to re-enable.
+- Compression presets and language settings in Account are currently display-only.
+- The delete-original-from-Photos flow and the full cut/retake pipeline haven't been verified end-to-end on a physical device with a real AssemblyAI key yet.
+- Not distributed on the App Store — sideloaded via Xcode.
 
 ## Credits
 
 Silence/retake detection pipeline ported from [Morfeu333/silence-retake-editing](https://github.com/Morfeu333/silence-retake-editing) (Python → Swift).
+
+## License
+
+MIT — see [LICENSE](LICENSE).

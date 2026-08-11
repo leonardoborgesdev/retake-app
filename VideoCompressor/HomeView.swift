@@ -6,16 +6,6 @@ struct HomeView: View {
             Spacer()
 
             NavigationLink {
-                RecordView()
-            } label: {
-                FeatureCard(
-                    systemImage: "doc.text.viewfinder",
-                    title: "Record with teleprompter",
-                    subtitle: "Paste a script, read it while filming, then compress or cut."
-                )
-            }
-
-            NavigationLink {
                 CompressOnlyView()
             } label: {
                 FeatureCard(
@@ -25,15 +15,10 @@ struct HomeView: View {
                 )
             }
 
-            NavigationLink {
-                CutOnlyView()
-            } label: {
-                FeatureCard(
-                    systemImage: "scissors",
-                    title: "Cut silence & retakes",
-                    subtitle: "Finds dead air and repeated lines. You pick the take."
-                )
-            }
+            // Record with teleprompter and Cut silence & retakes are disabled for now -
+            // focus is on Compress, the flow that's already validated end to end.
+            // The views themselves (RecordView, CutOnlyView) are untouched, just not
+            // linked from Home, so this is a one-line revert away from being back.
 
             Spacer()
             Spacer()

@@ -19,6 +19,7 @@ struct HomeView: View {
             // focus is on Compress, the flow that's already validated end to end.
             // The views themselves (RecordView, CutOnlyView) are untouched, just not
             // linked from Home, so this is a one-line revert away from being back.
+            // They're documented in the repo (README) as bonus/optional features.
 
             Spacer()
             Spacer()
@@ -36,7 +37,6 @@ private struct FeatureCard: View {
     let systemImage: String
     let title: String
     let subtitle: String
-
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: systemImage)
@@ -45,19 +45,12 @@ private struct FeatureCard: View {
                 .background(Theme.board)
                 .foregroundStyle(Theme.accent)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.inkSoft)
+                Text(title).font(.headline)
+                Text(subtitle).font(.subheadline).foregroundStyle(Theme.inkSoft)
             }
-
             Spacer()
-
-            Image(systemName: "chevron.right")
-                .foregroundStyle(Theme.inkSoft)
+            Image(systemName: "chevron.right").foregroundStyle(Theme.inkSoft)
         }
         .padding()
         .background(Theme.surface2)

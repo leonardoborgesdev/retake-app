@@ -1,0 +1,86 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-test-screenshot:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Compile check (generic iOS device, unsigned)
+        run: |
+          xcodebuild -project VideoCompressor.xcodeproj -scheme VideoCompressor \
+            -destination "generic/platform=iOS" CODE_SIGNING_ALLOWED=NO build
+
+      - name: Find an iPhone simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available | grep -m1 "iPhone" | grep -Eo '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}')
+          echo "Using simulator: $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Boot simulator
+        run: xcrun simctl boot ${{ steps.sim.outputs.udid }}
+
+      - name: Build for simulator
+        run: |
+          xcodebuild -project VideoCompressor.xcodeproj -scheme VideoCompressor \
+            -destination "id=${{ steps.sim.outputs.udid }}" build
+
+      - name: Run unit tests
+        run: |
+          xcodebuild test -project VideoCompressor.xcodeproj -scheme VideoCompressor \
+            -destination "id=${{ steps.sim.outputs.udid }}" -only-testing:VideoCompressorTests
+
+      - name: Screenshot every screen reachable without manual taps
+        run: |
+          set -e
+          UDID="${{ steps.sim.outputs.udid }}"
+          APP=$(find ~/Library/Developer/Xcode/DerivedData -name "VideoCompressor.app" -path "*iphonesimulator*" | head -1)
+          mkdir -p screenshots
+
+          # 1. Fresh install -> Splash (caught right after launch, before its
+          #    ~0.9s auto-dismiss timer fires)
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch "$UDID" com.automatrix.videocompressor
+          sleep 0.4
+          xcrun simctl io "$UDID" screenshot screenshots/01-splash.png
+
+          # 2. Onboarding (page 1) - Splash has dismissed, onboarding not yet seen
+          sleep 1.5
+          xcrun simctl io "$UDID" screenshot screenshots/02-onboarding.png
+
+          # 3. Auth / Log in - mark onboarding as seen, relaunch fresh
+          xcrun simctl terminate "$UDID" com.automatrix.videocompressor || true
+          xcrun simctl spawn "$UDID" defaults write com.automatrix.videocompressor hasSeenOnboarding -bool true
+          xcrun simctl launch "$UDID" com.automatrix.videocompressor
+          sleep 1.2
+          xcrun simctl io "$UDID" screenshot screenshots/03-login.png
+
+          # 4. Home (Compress-only) - seed a local session so RootView skips Auth
+          xcrun simctl terminate "$UDID" com.automatrix.videocompressor || true
+          JSON='{"name":"Demo User","email":"demo@retake.app"}'
+          HEX=$(printf '%s' "$JSON" | xxd -p | tr -d '\n')
+          xcrun simctl spawn "$UDID" defaults write com.automatrix.videocompressor com.automatrix.videocompressor.session -data "$HEX"
+          xcrun simctl launch "$UDID" com.automatrix.videocompressor
+          sleep 1.2
+          xcrun simctl io "$UDID" screenshot screenshots/04-home.png
+
+          echo "Captured:" && ls -la screenshots/
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-screenshots
+          path: screenshots/
+          retention-days: 30

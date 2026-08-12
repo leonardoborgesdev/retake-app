@@ -9,7 +9,8 @@ Filming yourself on an iPhone means you almost always stumble a line, say it twi
 ## Features
 
 - **On-device video compression** — re-encodes to H.265/HEVC using the iPhone's hardware encoder (`hevc_videotoolbox`), with real-time VideoToolbox mode for faster exports. No upload, no server, no account required.
-- **Silence & retake detection** — transcribes the audio, finds silence gaps and repeated phrases, and surfaces a review screen where you pick which take to keep. Implemented end-to-end; currently hidden from Home while compression is polished first (see Status).
+- **Silence & retake detection** *(bonus, not in-app)* — transcribes the audio, finds silence gaps and repeated phrases, and surfaces a review screen where you pick which take to keep. Fully implemented and tested in isolation, but not linked from Home — see Status.
+- **Record with teleprompter** *(bonus, not in-app)* — native camera capture with an auto-scrolling script overlay, chained into Compress/Cut. Also implemented and not linked from Home.
 - **Delete original from Photos** (opt-in) — reclaim storage after compressing, without losing the source unless you choose to.
 - **Local run history** — every compress/cut session is logged on-device.
 - **Nine implemented screens** — splash, onboarding, auth, home, compress, processing, retake review, history, and account.
@@ -76,7 +77,7 @@ VideoCompressor/
   AccountStore.swift / AccountView.swift / HistoryStore.swift / HistoryView.swift
   VideoPicker.swift / PhotoLibrarySaver.swift / APIKeyStore.swift
   SupabaseAuthClient.swift / Secrets.swift.example
-VideoCompressorTests/         28 XCTest cases covering the pure-logic pipeline
+VideoCompressorTests/         30 XCTest cases covering the pure-logic pipeline
 docs/
   design-mockup.md             Visual identity + screen-by-screen spec
   screenshots/                  Simulator screenshots
@@ -84,11 +85,12 @@ docs/
 
 ## Status
 
-All 9 mockup screens are implemented and match the design spec. The build compiles cleanly and all 28 tests pass. It's been run and tested end-to-end in the iPhone 17 Simulator. Physical-device testing is still pending.
+All 9 mockup screens are implemented and match the design spec. The build compiles cleanly and all 30 tests pass. It's been run and tested end-to-end in the iPhone 17 Simulator. Physical-device testing is still pending.
+
+**The app's focus is Compress.** Home only surfaces the compression flow — the one that's been exercised end-to-end and is closest to production-ready. Record (native camera + teleprompter) and Cut (silence/retake review) are real, working features with their own views and pipelines, but they're intentionally kept out of the app's navigation and documented here as bonus/optional rather than presented as equally core. They're a one-line change away from being wired back into Home if that becomes the priority.
 
 Known limitations:
 
-- Home currently surfaces **Compress only** — Record (native camera + teleprompter) and Cut (silence/retake review) are fully implemented but temporarily hidden from the tab bar while compression is polished first. The underlying views and pipeline are untouched and easy to re-enable.
 - Compression presets and language settings in Account are currently display-only.
 - The delete-original-from-Photos flow and the full cut/retake pipeline haven't been verified end-to-end on a physical device with a real AssemblyAI key yet.
 - Not distributed on the App Store — sideloaded via Xcode.

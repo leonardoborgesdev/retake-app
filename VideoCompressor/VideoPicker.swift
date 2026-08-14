@@ -28,8 +28,11 @@ struct PickedVideo {
 /// pipeline behind PhotosPicker.loadTransferable can fail or hang on large videos (tens of
 /// minutes / multiple GB). PHPickerViewController + NSItemProvider.loadFileRepresentation is the
 /// same native mechanism Photos itself uses to export files and is far more reliable at scale.
+/// No file size or duration limit is imposed here - large/4K/iCloud-only videos work the same
+/// way, just slower to export; onImportStart lets the caller show progress for that wait.
 struct VideoPicker: UIViewControllerRepresentable {
     let onPicked: (Result<PickedVideo, Error>) -> Void
+    var onImportStart: (() -> Void)? = nil
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration(photoLibrary: .shared())
@@ -44,14 +47,16 @@ struct VideoPicker: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(onPicked: onPicked)
+        Coordinator(onPicked: onPicked, onImportStart: onImportStart)
     }
 
     final class Coordinator: NSObject, PHPickerViewControllerDelegate {
         let onPicked: (Result<PickedVideo, Error>) -> Void
+        let onImportStart: (() -> Void)?
 
-        init(onPicked: @escaping (Result<PickedVideo, Error>) -> Void) {
+        init(onPicked: @escaping (Result<PickedVideo, Error>) -> Void, onImportStart: (() -> Void)?) {
             self.onPicked = onPicked
+            self.onImportStart = onImportStart
         }
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
@@ -65,6 +70,13 @@ struct VideoPicker: UIViewControllerRepresentable {
             guard provider.hasItemConformingToTypeIdentifier(typeIdentifier) else {
                 deliver(.failure(VideoPickerError.unsupportedItem))
                 return
+            }
+
+            // Large or iCloud-only videos can take a while to export - signal "started"
+            // now, before the (possibly long) load, so the caller can show a spinner
+            // instead of the screen looking frozen with nothing selected.
+            DispatchQueue.main.async { [onImportStart] in
+                onImportStart?()
             }
 
             provider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { [weak self] url, error in

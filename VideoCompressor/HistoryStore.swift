@@ -14,8 +14,20 @@ struct HistoryEntry: Codable, Identifiable, Equatable {
     let resultTag: String
     let originalBytes: Int64?
     let resultBytes: Int64?
+    /// Length of the source video, in seconds - independent of how long processing took.
+    let sourceDurationSeconds: Double?
+    /// Wall-clock time the compress/cut operation itself took, in seconds.
+    let processingSeconds: Double?
 
-    init(filename: String, kind: Kind, resultTag: String, originalBytes: Int64? = nil, resultBytes: Int64? = nil) {
+    init(
+        filename: String,
+        kind: Kind,
+        resultTag: String,
+        originalBytes: Int64? = nil,
+        resultBytes: Int64? = nil,
+        sourceDurationSeconds: Double? = nil,
+        processingSeconds: Double? = nil
+    ) {
         self.id = UUID()
         self.filename = filename
         self.date = Date()
@@ -23,6 +35,8 @@ struct HistoryEntry: Codable, Identifiable, Equatable {
         self.resultTag = resultTag
         self.originalBytes = originalBytes
         self.resultBytes = resultBytes
+        self.sourceDurationSeconds = sourceDurationSeconds
+        self.processingSeconds = processingSeconds
     }
 }
 

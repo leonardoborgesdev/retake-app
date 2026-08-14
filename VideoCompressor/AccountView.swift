@@ -1,5 +1,17 @@
 import SwiftUI
 
+enum AppLanguage: String, CaseIterable, Identifiable {
+    case en, pt, es
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .en: return "English"
+        case .pt: return "Português (Brasil)"
+        case .es: return "Español"
+        }
+    }
+}
+
 struct AccountView: View {
     @EnvironmentObject private var accountStore: AccountStore
     @EnvironmentObject private var historyStore: HistoryStore
@@ -7,6 +19,7 @@ struct AccountView: View {
     @State private var apiKey: String = APIKeyStore.load() ?? ""
     @State private var savedConfirmation = false
     @AppStorage("compressionTier") private var tierRawValue = CompressionTier.balanced.rawValue
+    @AppStorage("appLanguage") private var languageRawValue = AppLanguage.en.rawValue
 
     var body: some View {
         Form {
@@ -20,6 +33,11 @@ struct AccountView: View {
                     VStack(spacing: 2) {
                         Text(accountStore.session?.name ?? "-").font(.headline)
                         Text(accountStore.session?.email ?? "").font(.caption).foregroundStyle(Theme.inkSoft)
+                        if let createdAt = accountStore.session?.createdAt {
+                            Text("Member since \(createdAt.formatted(date: .abbreviated, time: .omitted))")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.inkSoft)
+                        }
                     }
 
                     Text("FREE PLAN")
@@ -31,7 +49,12 @@ struct AccountView: View {
 
                     HStack(spacing: 10) {
                         stat(value: "\(historyStore.entries.count)", label: "videos edited")
-                        stat(value: ByteFormatting.humanReadableSize(historyStore.totalBytesSaved), label: "saved")
+                        stat(value: "\(compressCount)", label: "compressed")
+                        stat(value: "\(cutCount)", label: "cut")
+                    }
+                    HStack(spacing: 10) {
+                        stat(value: ByteFormatting.humanReadableSize(historyStore.totalBytesSaved), label: "space saved")
+                        stat(value: lastActivityLabel, label: "last activity")
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -43,19 +66,18 @@ struct AccountView: View {
                 SecureField("AssemblyAI API key", text: $apiKey)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-
-                HStack {
-                    Text("Language")
-                    Spacer()
-                    Text("English").foregroundStyle(Theme.inkSoft)
-                }
             } header: {
-                Text("Account")
+                Text("Cut silence & retakes")
             } footer: {
                 Text("The API key is only used to transcribe audio for silence/retake detection. It stays in the iPhone Keychain.")
             }
 
-            Section("Editing") {
+            Section("Preferences") {
+                Picker("Language", selection: $languageRawValue) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(language.label).tag(language.rawValue)
+                    }
+                }
                 HStack {
                     Text("Default compression quality")
                     Spacer()
@@ -69,6 +91,11 @@ struct AccountView: View {
                     Text("Version")
                     Spacer()
                     Text("1.0.0").foregroundStyle(Theme.inkSoft)
+                }
+                HStack {
+                    Text("Support")
+                    Spacer()
+                    Text("leooborges27@gmail.com").foregroundStyle(Theme.inkSoft)
                 }
             }
 
@@ -99,6 +126,19 @@ struct AccountView: View {
         let letters = parts.prefix(2).compactMap { $0.first }
         let text = String(letters).uppercased()
         return text.isEmpty ? "?" : text
+    }
+
+    private var compressCount: Int {
+        historyStore.entries.filter { $0.kind == .compress }.count
+    }
+
+    private var cutCount: Int {
+        historyStore.entries.filter { $0.kind == .cut }.count
+    }
+
+    private var lastActivityLabel: String {
+        guard let mostRecent = historyStore.entries.first else { return "-" }
+        return mostRecent.date.formatted(date: .abbreviated, time: .omitted)
     }
 
     private func stat(value: String, label: String) -> some View {

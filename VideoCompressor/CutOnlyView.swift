@@ -7,11 +7,14 @@ struct CutOnlyView: View {
     @EnvironmentObject private var historyStore: HistoryStore
 
     @State private var showPicker = false
+    @State private var isImporting = false
     @State private var importedVideoURL: URL?
     @State private var player: AVPlayer?
     @State private var didSave = false
     @State private var isSaving = false
     @State private var errorMessage: String?
+    @State private var sourceDurationSeconds: Double?
+    @State private var pipelineStartedAt: Date?
 
     @StateObject private var editingPipeline = EditingPipeline()
 
@@ -45,6 +48,20 @@ struct CutOnlyView: View {
                             .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                 }
+            } else if isImporting {
+                VStack(spacing: 14) {
+                    ProgressView()
+                    Text("Preparing video…")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.inkSoft)
+                    Text("Large or iCloud videos can take a moment to download - no size limit, just hang tight.")
+                        .font(.caption)
+                        .foregroundStyle(Theme.inkSoft)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
+                .padding(.top, 60)
+                Spacer()
             } else {
                 VStack(spacing: 20) {
                     VStack(spacing: 12) {
@@ -53,7 +70,7 @@ struct CutOnlyView: View {
                             .foregroundStyle(Theme.inkSoft)
                         Text("No video selected")
                             .font(.headline)
-                        Text("Import a video to cut silence and repeated lines.")
+                        Text("Import a video to cut silence and repeated lines. Any length, any file size.")
                             .font(.subheadline)
                             .foregroundStyle(Theme.inkSoft)
                             .multilineTextAlignment(.center)
@@ -62,6 +79,7 @@ struct CutOnlyView: View {
                         .init(icon: "waveform.badge.magnifyingglass", label: "What it does", value: "Transcribes, finds gaps & retakes"),
                         .init(icon: "clock", label: "Takes about", value: "~1 min per minute of video"),
                         .init(icon: "checkmark.seal", label: "Benefit", value: "No desktop edit, you pick the take"),
+                        .init(icon: "infinity", label: "Size limit", value: "None - long recordings are fine"),
                     ])
                 }
                 .padding(.top, 32)
@@ -82,9 +100,11 @@ struct CutOnlyView: View {
         .navigationTitle("Cut silence & retakes")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {
-            VideoPicker { result in
+            VideoPicker(onPicked: { result in
                 handlePicked(result)
-            }
+            }, onImportStart: {
+                isImporting = true
+            })
             .ignoresSafeArea()
         }
         .sheet(isPresented: Binding(
@@ -109,22 +129,33 @@ struct CutOnlyView: View {
             guard player == nil, let initialURL else { return }
             importedVideoURL = initialURL
             player = AVPlayer(url: initialURL)
+            loadDuration(url: initialURL)
         }
     }
 
     private func handlePicked(_ result: Result<PickedVideo, Error>) {
         resetState()
+        isImporting = false
         switch result {
         case .success(let picked):
             importedVideoURL = picked.url
             player = AVPlayer(url: picked.url)
+            loadDuration(url: picked.url)
         case .failure(let error):
             errorMessage = error.localizedDescription
         }
     }
 
+    private func loadDuration(url: URL) {
+        Task {
+            let asset = AVURLAsset(url: url)
+            sourceDurationSeconds = try? CMTimeGetSeconds(await asset.load(.duration))
+        }
+    }
+
     private func runEditingPipeline() async {
         guard let importedVideoURL else { return }
+        pipelineStartedAt = Date()
         if let result = await editingPipeline.run(sourceURL: importedVideoURL) {
             await save(url: result, sourceName: importedVideoURL.lastPathComponent)
         } else if let message = editingPipeline.errorMessage {
@@ -148,10 +179,13 @@ struct CutOnlyView: View {
             try await PhotoLibrarySaver.save(videoURL: url)
             didSave = true
             let cutCount = editingPipeline.cutCount
+            let elapsed = pipelineStartedAt.map { Date().timeIntervalSince($0) }
             historyStore.record(HistoryEntry(
                 filename: sourceName,
                 kind: .cut,
-                resultTag: "\(cutCount) cut\(cutCount == 1 ? "" : "s")"
+                resultTag: "\(cutCount) cut\(cutCount == 1 ? "" : "s")",
+                sourceDurationSeconds: sourceDurationSeconds,
+                processingSeconds: elapsed
             ))
             try? FileManager.default.removeItem(at: url)
         } catch {
@@ -164,6 +198,8 @@ struct CutOnlyView: View {
         player = nil
         didSave = false
         errorMessage = nil
+        sourceDurationSeconds = nil
+        pipelineStartedAt = nil
     }
 }
 

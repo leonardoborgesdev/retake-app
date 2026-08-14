@@ -26,6 +26,7 @@ struct SupabaseSession: Codable {
     let userId: String
     let email: String
     let name: String
+    let createdAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
@@ -37,18 +38,20 @@ struct SupabaseSession: Codable {
         case id
         case email
         case userMetadata = "user_metadata"
+        case createdAt = "created_at"
     }
 
     enum MetadataKeys: String, CodingKey {
         case name
     }
 
-    init(accessToken: String, refreshToken: String, userId: String, email: String, name: String) {
+    init(accessToken: String, refreshToken: String, userId: String, email: String, name: String, createdAt: Date? = nil) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken
         self.userId = userId
         self.email = email
         self.name = name
+        self.createdAt = createdAt
     }
 
     init(from decoder: Decoder) throws {
@@ -63,6 +66,11 @@ struct SupabaseSession: Codable {
         } else {
             name = email
         }
+        if let raw = try? userContainer.decode(String.self, forKey: .createdAt) {
+            createdAt = ISO8601DateFormatter.supabase.date(from: raw)
+        } else {
+            createdAt = nil
+        }
     }
 
     func encode(to encoder: Encoder) throws {
@@ -70,6 +78,14 @@ struct SupabaseSession: Codable {
         try container.encode(accessToken, forKey: .accessToken)
         try container.encode(refreshToken, forKey: .refreshToken)
     }
+}
+
+private extension ISO8601DateFormatter {
+    static let supabase: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
 }
 
 enum SupabaseAuthClient {

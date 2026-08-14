@@ -4,6 +4,7 @@ import Security
 struct AccountSession: Codable, Equatable {
     var name: String
     var email: String
+    var createdAt: Date?
 }
 
 enum AccountError: LocalizedError {
@@ -64,7 +65,7 @@ final class AccountStore: ObservableObject {
 
     private func applySession(_ supabaseSession: SupabaseSession) {
         pendingConfirmationEmail = nil
-        let account = AccountSession(name: supabaseSession.name, email: supabaseSession.email)
+        let account = AccountSession(name: supabaseSession.name, email: supabaseSession.email, createdAt: supabaseSession.createdAt)
         session = account
         if let data = try? JSONEncoder().encode(account) {
             UserDefaults.standard.set(data, forKey: sessionKey)

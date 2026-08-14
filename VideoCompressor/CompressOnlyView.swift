@@ -8,6 +8,7 @@ struct CompressOnlyView: View {
     @EnvironmentObject private var historyStore: HistoryStore
 
     @State private var showPicker = false
+    @State private var isImporting = false
     @State private var importedVideoURL: URL?
     @State private var importedAssetIdentifier: String?
     @State private var player: AVPlayer?
@@ -67,6 +68,20 @@ struct CompressOnlyView: View {
                             .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                 }
+            } else if isImporting {
+                VStack(spacing: 14) {
+                    ProgressView()
+                    Text("Preparing video…")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.inkSoft)
+                    Text("Large or iCloud videos can take a moment to download - no size limit, just hang tight.")
+                        .font(.caption)
+                        .foregroundStyle(Theme.inkSoft)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
+                .padding(.top, 60)
+                Spacer()
             } else {
                 VStack(spacing: 20) {
                     VStack(spacing: 12) {
@@ -75,7 +90,7 @@ struct CompressOnlyView: View {
                             .foregroundStyle(Theme.inkSoft)
                         Text("No video selected")
                             .font(.headline)
-                        Text("Import a video from your library to compress it.")
+                        Text("Import a video from your library to compress it. Any length, any file size.")
                             .font(.subheadline)
                             .foregroundStyle(Theme.inkSoft)
                             .multilineTextAlignment(.center)
@@ -84,6 +99,7 @@ struct CompressOnlyView: View {
                         .init(icon: "wand.and.stars", label: "What it does", value: "Re-encodes to HEVC on-device"),
                         .init(icon: "clock", label: "Takes about", value: "10–90s, depends on length"),
                         .init(icon: "checkmark.seal", label: "Benefit", value: "Up to 80% smaller, same look"),
+                        .init(icon: "infinity", label: "Size limit", value: "None - 4K, long takes, all fine"),
                     ])
                 }
                 .padding(.top, 32)
@@ -104,9 +120,11 @@ struct CompressOnlyView: View {
         .navigationTitle("Compress")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPicker) {
-            VideoPicker { result in
+            VideoPicker(onPicked: { result in
                 handlePicked(result)
-            }
+            }, onImportStart: {
+                isImporting = true
+            })
             .ignoresSafeArea()
         }
         .alert("Error", isPresented: .constant(errorMessage != nil), actions: {
@@ -217,6 +235,7 @@ struct CompressOnlyView: View {
 
     private func handlePicked(_ result: Result<PickedVideo, Error>) {
         resetState()
+        isImporting = false
         switch result {
         case .success(let picked):
             importedAssetIdentifier = picked.assetIdentifier
@@ -248,12 +267,14 @@ struct CompressOnlyView: View {
         let outputURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("compressed-\(UUID().uuidString)")
             .appendingPathExtension("mp4")
+        let startedAt = Date()
         do {
             try await compressionService.compress(inputURL: importedVideoURL, outputURL: outputURL, tier: tier)
             let resultBytes = fileSize(at: outputURL)
             compressedSizeBytes = resultBytes
             try await PhotoLibrarySaver.save(videoURL: outputURL)
             didSave = true
+            let elapsed = Date().timeIntervalSince(startedAt)
             if let originalSizeBytes, let resultBytes {
                 let savings = ByteFormatting.savingsPercentage(originalBytes: originalSizeBytes, compressedBytes: resultBytes)
                 historyStore.record(HistoryEntry(
@@ -261,7 +282,9 @@ struct CompressOnlyView: View {
                     kind: .compress,
                     resultTag: "-\(savings)%",
                     originalBytes: originalSizeBytes,
-                    resultBytes: resultBytes
+                    resultBytes: resultBytes,
+                    sourceDurationSeconds: sourceDurationSeconds,
+                    processingSeconds: elapsed
                 ))
             }
             try? FileManager.default.removeItem(at: outputURL)

@@ -11,15 +11,26 @@ struct HomeView: View {
                 FeatureCard(
                     systemImage: "arrow.down.right.and.arrow.up.left",
                     title: "Compress video",
-                    subtitle: "Smaller file, sharper result — on-device, no upload."
+                    subtitle: "Smaller file, sharper result — on-device, no upload. Any length, any size."
                 )
             }
 
-            // Record with teleprompter and Cut silence & retakes are disabled for now -
-            // focus is on Compress, the flow that's already validated end to end.
-            // The views themselves (RecordView, CutOnlyView) are untouched, just not
-            // linked from Home, so this is a one-line revert away from being back.
-            // They're documented in the repo (README) as bonus/optional features.
+            // Cut silence & retakes is the app's real differentiator - retake detection
+            // with manual take review doesn't exist in any other native iOS app, only in
+            // desktop plugins/SaaS. Featured here, not hidden as a bonus.
+            NavigationLink {
+                CutOnlyView()
+            } label: {
+                FeatureCard(
+                    systemImage: "waveform.badge.magnifyingglass",
+                    title: "Cut silence & retakes",
+                    subtitle: "Finds dead air and repeated lines. You pick the take.",
+                    badge: "Unique to retake."
+                )
+            }
+
+            // Record with teleprompter stays bonus/unlinked for now - implemented,
+            // documented in the README, not surfaced in Home yet.
 
             Spacer()
             Spacer()
@@ -37,6 +48,8 @@ private struct FeatureCard: View {
     let systemImage: String
     let title: String
     let subtitle: String
+    var badge: String? = nil
+
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: systemImage)
@@ -45,10 +58,20 @@ private struct FeatureCard: View {
                 .background(Theme.board)
                 .foregroundStyle(Theme.accent)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(title).font(.headline)
+                if let badge {
+                    Text(badge.uppercased())
+                        .font(.caption2.weight(.bold))
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Theme.accentSoft)
+                        .foregroundStyle(Theme.accent)
+                        .clipShape(Capsule())
+                }
                 Text(subtitle).font(.subheadline).foregroundStyle(Theme.inkSoft)
             }
+
             Spacer()
             Image(systemName: "chevron.right").foregroundStyle(Theme.inkSoft)
         }

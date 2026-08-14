@@ -47,12 +47,29 @@ struct HistoryDetailView: View {
         var rows: [FeatureInfoCard.Row] = [
             .init(icon: "wrench.and.screwdriver", label: "Tool used", value: entry.kind == .compress ? "Compress" : "Cut silence & retakes"),
         ]
+        if let duration = entry.sourceDurationSeconds {
+            rows.append(.init(icon: "timeline.selection", label: "Video length", value: Self.formatDuration(duration)))
+        }
         if let original = entry.originalBytes, let result = entry.resultBytes {
             rows.append(.init(icon: "shippingbox", label: "Before", value: ByteFormatting.humanReadableSize(original)))
             rows.append(.init(icon: "shippingbox.fill", label: "After", value: ByteFormatting.humanReadableSize(result)))
+            let saved = max(0, original - result)
+            if saved > 0 {
+                rows.append(.init(icon: "arrow.down.circle", label: "Space saved", value: ByteFormatting.humanReadableSize(saved)))
+            }
         }
         rows.append(.init(icon: "tag", label: "Result", value: entry.resultTag))
+        if let processing = entry.processingSeconds {
+            rows.append(.init(icon: "clock", label: "Processing time", value: Self.formatDuration(processing)))
+        }
         return rows
+    }
+
+    private static func formatDuration(_ seconds: Double) -> String {
+        let totalSeconds = Int(seconds.rounded())
+        let minutes = totalSeconds / 60
+        let secs = totalSeconds % 60
+        return minutes > 0 ? "\(minutes)m \(secs)s" : "\(secs)s"
     }
 }
 

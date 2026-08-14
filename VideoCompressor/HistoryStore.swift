@@ -4,6 +4,7 @@ struct HistoryEntry: Codable, Identifiable, Equatable {
     enum Kind: String, Codable {
         case compress
         case cut
+        case split
     }
 
     let id: UUID

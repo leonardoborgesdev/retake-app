@@ -28,6 +28,18 @@ enum CompressionTier: String, CaseIterable, Identifiable {
     }
 }
 
+/// Segment length options offered on the Stories-split screen - kept to values that
+/// map cleanly onto real Stories/Reels formats instead of an arbitrary free-typed number.
+enum StorySegmentDuration: Int, CaseIterable, Identifiable {
+    case fifteen = 15
+    case thirty = 30
+    case sixty = 60
+    case ninety = 90
+
+    var id: Int { rawValue }
+    var label: String { "\(rawValue)s" }
+}
+
 enum FFmpegCommandBuilder {
     /// Uses the iPhone hardware HEVC encoder (VideoToolbox) instead of libx265: the
     /// ffmpeg-kit-spm build we ship is the GPL-free "min" variant, which does not include
@@ -47,5 +59,19 @@ enum FFmpegCommandBuilder {
         let videoBytes = Double(tier.bitrateKbps) * 1000 / 8 * durationSeconds
         let audioAndOverheadBytes = 128.0 * 1000 / 8 * durationSeconds + 200_000
         return Int64(videoBytes + audioAndOverheadBytes)
+    }
+
+    /// Splits a video into fixed-length sequential pieces (e.g. one long take into a
+    /// run of 60s Stories clips, in order) using ffmpeg's segment muxer. Stream-copies
+    /// (`-c copy`) rather than re-encoding - much faster, and quality is untouched -
+    /// so cuts land on the nearest keyframe rather than the exact second; fine for this
+    /// use case, not frame-accurate like the retake cutter.
+    static func segmentArguments(inputPath: String, outputPattern: String, segmentSeconds: Int) -> String {
+        "-y -i \"\(inputPath)\" -c copy -map 0 -f segment -segment_time \(segmentSeconds) -reset_timestamps 1 \"\(outputPattern)\""
+    }
+
+    static func expectedSegmentCount(durationSeconds: Double, segmentSeconds: Int) -> Int {
+        guard segmentSeconds > 0 else { return 0 }
+        return max(1, Int((durationSeconds / Double(segmentSeconds)).rounded(.up)))
     }
 }

@@ -22,13 +22,25 @@ struct CompressOnlyView: View {
     @State private var errorMessage: String?
     @AppStorage("compressionTier") private var tierRawValue = CompressionTier.balanced.rawValue
 
+    // Batch/queue compress: pick several videos, they compress one after another
+    // at the current quality tier, each saved to Photos and logged to History as
+    // it finishes - no manual "compress" tap per file.
+    @State private var showBatchPicker = false
+    @State private var batchQueue: [PickedVideo] = []
+    @State private var isBatchProcessing = false
+    @State private var batchIndex = 0
+    @State private var batchResults: [(filename: String, before: Int64, after: Int64)] = []
+    @State private var batchDone = false
+
     @StateObject private var compressionService = VideoCompressionService()
 
     private var tier: CompressionTier { CompressionTier(rawValue: tierRawValue) ?? .balanced }
 
     var body: some View {
         VStack(spacing: 20) {
-            if let player {
+            if isBatchProcessing || batchDone {
+                batchProgressView
+            } else if let player {
                 VideoPlayer(player: player)
                     .frame(height: 200)
                     .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
@@ -106,13 +118,24 @@ struct CompressOnlyView: View {
                 Spacer()
             }
 
-            Button {
-                showPicker = true
-            } label: {
-                Label("Import video", systemImage: "photo.on.rectangle")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 11)
-                    .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+            if !isBatchProcessing && !batchDone && player == nil {
+                Button {
+                    showPicker = true
+                } label: {
+                    Label("Import video", systemImage: "photo.on.rectangle")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 11)
+                        .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                }
+
+                Button {
+                    showBatchPicker = true
+                } label: {
+                    Label("Import multiple (batch)", systemImage: "square.stack.3d.up")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 11)
+                        .foregroundStyle(Theme.inkSoft)
+                }
             }
         }
         .padding()
@@ -127,6 +150,15 @@ struct CompressOnlyView: View {
             })
             .ignoresSafeArea()
         }
+        .sheet(isPresented: $showBatchPicker) {
+            BatchVideoPicker(onPicked: { picked in
+                batchQueue = picked
+                if !picked.isEmpty {
+                    Task { await processBatch() }
+                }
+            })
+            .ignoresSafeArea()
+        }
         .alert("Error", isPresented: .constant(errorMessage != nil), actions: {
             Button("OK") { errorMessage = nil }
         }, message: {
@@ -135,6 +167,129 @@ struct CompressOnlyView: View {
         .onAppear {
             guard player == nil, let initialURL else { return }
             load(url: initialURL)
+        }
+    }
+
+    private var batchProgressView: some View {
+        VStack(spacing: 16) {
+            if isBatchProcessing {
+                VStack(spacing: 10) {
+                    Text("Compressing \(batchIndex + 1) of \(batchQueue.count)")
+                        .font(.headline)
+                    Text(batchQueue.indices.contains(batchIndex) ? batchQueue[batchIndex].url.lastPathComponent : "")
+                        .font(.caption)
+                        .foregroundStyle(Theme.inkSoft)
+                        .lineLimit(1)
+
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(Theme.surface2)
+                            Capsule().fill(Theme.accent)
+                                .frame(width: geo.size.width * compressionService.progress)
+                        }
+                    }
+                    .frame(height: 6)
+                }
+                .padding(.top, 20)
+            } else if batchDone {
+                VStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 36))
+                        .foregroundStyle(Theme.accent)
+                    Text("\(batchResults.count) video\(batchResults.count == 1 ? "" : "s") compressed")
+                        .font(.headline)
+                    let totalSaved = batchResults.reduce(Int64(0)) { $0 + max(0, $1.before - $1.after) }
+                    Text("\(ByteFormatting.humanReadableSize(totalSaved)) saved in total")
+                        .font(.subheadline)
+                        .foregroundStyle(Theme.inkSoft)
+                }
+                .padding(.top, 20)
+            }
+
+            if !batchResults.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(Array(batchResults.enumerated()), id: \.offset) { index, result in
+                        HStack(spacing: 10) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(Theme.accent)
+                            Text(result.filename)
+                                .font(.caption)
+                                .lineLimit(1)
+                            Spacer()
+                            Text("-\(ByteFormatting.savingsPercentage(originalBytes: result.before, compressedBytes: result.after))%")
+                                .font(.caption.monospaced().weight(.semibold))
+                                .foregroundStyle(Theme.inkSoft)
+                        }
+                        .padding(.vertical, 8)
+                        if index < batchResults.count - 1 {
+                            Divider().overlay(Theme.line)
+                        }
+                    }
+                }
+                .padding(.horizontal, 14)
+                .background(Theme.surface2)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            }
+
+            Spacer()
+
+            if batchDone {
+                Button {
+                    batchQueue = []
+                    batchResults = []
+                    batchDone = false
+                    batchIndex = 0
+                } label: {
+                    Text("Done")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Theme.board)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                }
+            }
+        }
+    }
+
+    private func processBatch() async {
+        isBatchProcessing = true
+        batchResults = []
+        defer { isBatchProcessing = false; batchDone = true }
+
+        let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "batch-compress")
+        defer { UIApplication.shared.endBackgroundTask(backgroundTask) }
+
+        for (index, item) in batchQueue.enumerated() {
+            batchIndex = index
+            let before = fileSize(at: item.url) ?? 0
+            let duration = try? await compressionService.videoDurationSeconds(url: item.url)
+            let outputURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("compressed-\(UUID().uuidString)")
+                .appendingPathExtension("mp4")
+            let startedAt = Date()
+            do {
+                try await compressionService.compress(inputURL: item.url, outputURL: outputURL, tier: tier)
+                let after = fileSize(at: outputURL) ?? 0
+                try await PhotoLibrarySaver.save(videoURL: outputURL)
+                let elapsed = Date().timeIntervalSince(startedAt)
+                let savings = ByteFormatting.savingsPercentage(originalBytes: before, compressedBytes: after)
+                historyStore.record(HistoryEntry(
+                    filename: item.url.lastPathComponent,
+                    kind: .compress,
+                    resultTag: "-\(savings)%",
+                    originalBytes: before,
+                    resultBytes: after,
+                    sourceDurationSeconds: duration,
+                    processingSeconds: elapsed
+                ))
+                batchResults.append((filename: item.url.lastPathComponent, before: before, after: after))
+            } catch {
+                // Skip this file, keep processing the rest of the queue instead of
+                // aborting the whole batch over one bad file.
+            }
+            try? FileManager.default.removeItem(at: outputURL)
+            try? FileManager.default.removeItem(at: item.url)
         }
     }
 

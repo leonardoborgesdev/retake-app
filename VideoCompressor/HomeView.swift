@@ -29,6 +29,19 @@ struct HomeView: View {
                 )
             }
 
+            // Split for Stories: fixed-length sequential clips, no AI - pairs with
+            // Compress/Cut to cover the whole "record -> shrink -> post" chain.
+            NavigationLink {
+                StorySplitView()
+            } label: {
+                FeatureCard(
+                    systemImage: "square.split.2x1",
+                    title: "Split for Stories",
+                    subtitle: "Cut one long take into ordered clips, ready to post.",
+                    badge: "New"
+                )
+            }
+
             // Record with teleprompter stays bonus/unlinked for now - implemented,
             // documented in the README, not surfaced in Home yet.
 

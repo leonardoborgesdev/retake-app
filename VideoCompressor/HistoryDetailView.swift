@@ -9,7 +9,7 @@ struct HistoryDetailView: View {
                 .fill(LinearGradient(colors: [Theme.surface3, Theme.board], startPoint: .topLeading, endPoint: .bottomTrailing))
                 .frame(height: 140)
                 .overlay(
-                    Image(systemName: entry.kind == .compress ? "arrow.down.right.and.arrow.up.left" : "scissors")
+                    Image(systemName: kindIcon)
                         .font(.system(size: 36))
                         .foregroundStyle(Theme.accent)
                 )
@@ -27,9 +27,9 @@ struct HistoryDetailView: View {
             Spacer()
 
             NavigationLink {
-                if entry.kind == .compress { CompressOnlyView() } else { CutOnlyView() }
+                destinationView
             } label: {
-                Text(entry.kind == .compress ? "Compress another video" : "Cut another video")
+                Text(actionLabel)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(Theme.board)
@@ -43,9 +43,42 @@ struct HistoryDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    private var kindIcon: String {
+        switch entry.kind {
+        case .compress: return "arrow.down.right.and.arrow.up.left"
+        case .cut: return "scissors"
+        case .split: return "square.split.2x1"
+        }
+    }
+
+    private var kindLabel: String {
+        switch entry.kind {
+        case .compress: return "Compress"
+        case .cut: return "Cut silence & retakes"
+        case .split: return "Split for Stories"
+        }
+    }
+
+    private var actionLabel: String {
+        switch entry.kind {
+        case .compress: return "Compress another video"
+        case .cut: return "Cut another video"
+        case .split: return "Split another video"
+        }
+    }
+
+    @ViewBuilder
+    private var destinationView: some View {
+        switch entry.kind {
+        case .compress: CompressOnlyView()
+        case .cut: CutOnlyView()
+        case .split: StorySplitView()
+        }
+    }
+
     private var infoRows: [FeatureInfoCard.Row] {
         var rows: [FeatureInfoCard.Row] = [
-            .init(icon: "wrench.and.screwdriver", label: "Tool used", value: entry.kind == .compress ? "Compress" : "Cut silence & retakes"),
+            .init(icon: "wrench.and.screwdriver", label: "Tool used", value: kindLabel),
         ]
         if let duration = entry.sourceDurationSeconds {
             rows.append(.init(icon: "timeline.selection", label: "Video length", value: Self.formatDuration(duration)))

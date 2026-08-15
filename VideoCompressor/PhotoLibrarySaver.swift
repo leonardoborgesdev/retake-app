@@ -37,13 +37,19 @@ enum PhotoLibrarySaver {
     /// hands back even under limited photo library access (no broader permission needed - this
     /// only works for assets the user just explicitly selected). Always opt-in, never automatic.
     static func deleteAsset(identifier: String) async throws {
-        let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: [identifier], options: nil)
-        guard let asset = fetchResult.firstObject else {
+        try await deleteAssets(identifiers: [identifier])
+    }
+
+    /// Batch delete, used by Find Duplicates so removing several videos the user selected is
+    /// one system confirmation instead of one per video.
+    static func deleteAssets(identifiers: [String]) async throws {
+        let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: identifiers, options: nil)
+        guard fetchResult.count > 0 else {
             throw PhotoLibrarySaveError.assetNotFound
         }
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             PHPhotoLibrary.shared().performChanges({
-                PHAssetChangeRequest.deleteAssets([asset] as NSArray)
+                PHAssetChangeRequest.deleteAssets(fetchResult)
             }, completionHandler: { success, error in
                 if success {
                     continuation.resume()
@@ -51,6 +57,16 @@ enum PhotoLibrarySaver {
                     continuation.resume(throwing: PhotoLibrarySaveError.deleteFailed(error?.localizedDescription ?? "unknown error"))
                 }
             })
+        }
+    }
+
+    /// Full-library read access, needed only by Find Duplicates - Compress/Cut/Split never
+    /// need this since PHPickerViewController works with zero Photos permission at all.
+    static func requestReadWriteAuthorization() async -> Bool {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+                continuation.resume(returning: status == .authorized || status == .limited)
+            }
         }
     }
 }

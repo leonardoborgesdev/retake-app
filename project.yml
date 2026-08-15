@@ -16,7 +16,7 @@ settings:
     INFOPLIST_KEY_CFBundleDisplayName: "retake."
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "Used to save your compressed or edited video back to your library."
-    INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Used only to delete the original video when you explicitly choose to, after compressing it."
+    INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "Used to delete an original after compressing it, and to scan for duplicate videos in Find Duplicates - both only when you choose to."
     INFOPLIST_KEY_NSCameraUsageDescription: "Used to record video with the built-in teleprompter."
     INFOPLIST_KEY_NSMicrophoneUsageDescription: "Used to record audio while filming with the built-in teleprompter."
     DEVELOPMENT_LANGUAGE: en

@@ -61,6 +61,16 @@ final class HistoryStore: ObservableObject {
         save()
     }
 
+    func delete(at offsets: IndexSet) {
+        entries.remove(atOffsets: offsets)
+        save()
+    }
+
+    func delete(_ entry: HistoryEntry) {
+        entries.removeAll { $0.id == entry.id }
+        save()
+    }
+
     var totalBytesSaved: Int64 {
         entries.reduce(0) { partial, entry in
             guard let original = entry.originalBytes, let result = entry.resultBytes else { return partial }

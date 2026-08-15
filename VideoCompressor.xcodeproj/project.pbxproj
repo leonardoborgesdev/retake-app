@@ -39,6 +39,7 @@
 		7DE069E6DD8C0F0C55A2426E /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBEC2A102A6B7B789B9EC4CA /* OnboardingView.swift */; };
 		879EF6A993DCD47D5ED96A7C /* CameraRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE11F8B48F0606847394D8B2 /* CameraRecorder.swift */; };
 		9205BFD939C4B7215C9CDB7E /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A139C9ABBEDA8B328BAD133 /* HistoryView.swift */; };
+		943FF255BE9B8B3D990A0226 /* DuplicateFinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81D2479810BAA04D3424B5B /* DuplicateFinderView.swift */; };
 		99A597AD531D9AAFE18CDB76 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C076F62F0F92DA37C0C23A4A /* AccountView.swift */; };
 		A93278994F1C049DCDDE29CE /* FFmpegLogBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */; };
 		AEFFD8498955BBCC78E65AFD /* CompressOnlyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B48328B1B22F393204EF9A /* CompressOnlyView.swift */; };
@@ -130,6 +131,7 @@
 		C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditingPipeline.swift; sourceTree = "<group>"; };
 		D1F764296A8C85461323ED0A /* FeatureInfoCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureInfoCard.swift; sourceTree = "<group>"; };
 		D7BCE6D1E77D8CFBC5AE7461 /* SilenceCutPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilenceCutPlannerTests.swift; sourceTree = "<group>"; };
+		D81D2479810BAA04D3424B5B /* DuplicateFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderView.swift; sourceTree = "<group>"; };
 		DF6278585CBFE5CF58CF6936 /* TranscriptQA.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptQA.swift; sourceTree = "<group>"; };
 		E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FFmpegLogBuffer.swift; sourceTree = "<group>"; };
 		E31083E411555CFD9906B05A /* ByteFormatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteFormatting.swift; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 				835A1FB86A59848BD71FD3B3 /* CutOnlyView.swift */,
 				33FFA899722E61FB12953DF5 /* CutRenderer.swift */,
 				EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */,
+				D81D2479810BAA04D3424B5B /* DuplicateFinderView.swift */,
 				C93AEEBB97D606D4F6AFE690 /* EditingPipeline.swift */,
 				D1F764296A8C85461323ED0A /* FeatureInfoCard.swift */,
 				3ED02434687B8E2A7A767695 /* FFmpegCommandBuilder.swift */,
@@ -351,6 +354,7 @@
 				BA2CE053BE7962A333E19A27 /* CutOnlyView.swift in Sources */,
 				73E1A3DD21FF5CBECDDF728F /* CutRenderExecutor.swift in Sources */,
 				B0FA19C27A9FBC0CC09CE444 /* CutRenderer.swift in Sources */,
+				943FF255BE9B8B3D990A0226 /* DuplicateFinderView.swift in Sources */,
 				C30584796CD41088C3F722B7 /* EditingPipeline.swift in Sources */,
 				5936AE489A3DFD9BB023F164 /* FFmpegCommandBuilder.swift in Sources */,
 				A93278994F1C049DCDDE29CE /* FFmpegLogBuffer.swift in Sources */,
@@ -478,7 +482,7 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Used to record video with the built-in teleprompter.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Used to record audio while filming with the built-in teleprompter.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Used to save your compressed or edited video back to your library.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Used only to delete the original video when you explicitly choose to, after compressing it.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Used to delete an original after compressing it, and to scan for duplicate videos in Find Duplicates - both only when you choose to.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;
@@ -602,7 +606,7 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Used to record video with the built-in teleprompter.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Used to record audio while filming with the built-in teleprompter.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Used to save your compressed or edited video back to your library.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Used only to delete the original video when you explicitly choose to, after compressing it.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Used to delete an original after compressing it, and to scan for duplicate videos in Find Duplicates - both only when you choose to.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.0;

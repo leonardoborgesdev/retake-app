@@ -42,6 +42,20 @@ struct HomeView: View {
                 )
             }
 
+            // Find Duplicates: retake.'s own users generate exactly this clutter -
+            // every Compress run leaves the original behind. Same-length, same-day
+            // grouping, on-device, nothing deletes without explicit confirmation.
+            NavigationLink {
+                DuplicateFinderView()
+            } label: {
+                FeatureCard(
+                    systemImage: "square.on.square",
+                    title: "Find duplicates",
+                    subtitle: "Groups same-length videos from the same day. You choose what to delete.",
+                    badge: "New"
+                )
+            }
+
             // Record with teleprompter stays bonus/unlinked for now - implemented,
             // documented in the README, not surfaced in Home yet.
 

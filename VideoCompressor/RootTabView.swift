@@ -40,6 +40,7 @@ struct RootTabView: View {
                     case "compress": CompressOnlyView(initialURL: debugURL)
                     case "cut": CutOnlyView(initialURL: debugURL)
                     case "split": StorySplitView(initialURL: debugURL)
+                    case "duplicates": DuplicateFinderView()
                     default: EmptyView()
                     }
                 }

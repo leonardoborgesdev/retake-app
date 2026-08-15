@@ -27,7 +27,7 @@ struct StorySplitView: View {
     @State private var importedVideoURL: URL?
     @State private var player: AVPlayer?
     @State private var sourceDurationSeconds: Double?
-    @State private var segmentDuration: StorySegmentDuration = .sixty
+    @State private var segmentDuration: StorySegmentDuration = .fiftyNine
     @State private var isSplitting = false
     @State private var splitProgress: Double = 0
     @State private var resultURLs: [URL] = []
@@ -51,13 +51,14 @@ struct StorySplitView: View {
                     Button {
                         Task { await split() }
                     } label: {
-                        Text("Split into \(expectedCount) clips")
+                        Text(sourceDurationSeconds == nil ? "Reading video…" : "Split into \(expectedCount) clips")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background(Theme.board)
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
+                    .disabled(sourceDurationSeconds == nil)
                 }
             } else if isImporting {
                 VStack(spacing: 14) {
@@ -227,6 +228,7 @@ struct StorySplitView: View {
         isSplitting = true
         splitProgress = 0
         defer { isSplitting = false }
+        NotificationManager.requestAuthorizationIfNeeded()
 
         let outputDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("split-\(UUID().uuidString)")
@@ -255,6 +257,10 @@ struct StorySplitView: View {
             }
             resultURLs = clips
             didFinish = true
+            NotificationManager.notifyJobFinished(
+                title: "Split for Stories finished",
+                body: "\(clips.count) clip\(clips.count == 1 ? "" : "s") ready in Photos."
+            )
 
             let elapsed = Date().timeIntervalSince(startedAt)
             historyStore.record(HistoryEntry(

@@ -130,6 +130,14 @@ struct CutOnlyView: View {
             importedVideoURL = initialURL
             player = AVPlayer(url: initialURL)
             loadDuration(url: initialURL)
+#if DEBUG
+            if UserDefaults.standard.bool(forKey: "debugAutoRun") {
+                Task {
+                    try? await Task.sleep(nanoseconds: 800_000_000)
+                    await runEditingPipeline()
+                }
+            }
+#endif
         }
     }
 
@@ -156,6 +164,7 @@ struct CutOnlyView: View {
     private func runEditingPipeline() async {
         guard let importedVideoURL else { return }
         pipelineStartedAt = Date()
+        NotificationManager.requestAuthorizationIfNeeded()
         if let result = await editingPipeline.run(sourceURL: importedVideoURL) {
             await save(url: result, sourceName: importedVideoURL.lastPathComponent)
         } else if let message = editingPipeline.errorMessage {
@@ -178,6 +187,10 @@ struct CutOnlyView: View {
         do {
             try await PhotoLibrarySaver.save(videoURL: url)
             didSave = true
+            NotificationManager.notifyJobFinished(
+                title: "Cut silence & retakes finished",
+                body: "\(sourceName) is ready in Photos."
+            )
             let cutCount = editingPipeline.cutCount
             let elapsed = pipelineStartedAt.map { Date().timeIntervalSince($0) }
             historyStore.record(HistoryEntry(

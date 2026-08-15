@@ -16,6 +16,9 @@ struct CompressOnlyView: View {
     @State private var sourceDurationSeconds: Double?
     @State private var compressedSizeBytes: Int64?
     @State private var isCompressing = false
+    @State private var isSaving = false
+    @State private var pendingOutputURL: URL?
+    @State private var pendingElapsedSeconds: Double?
     @State private var didSave = false
     @State private var didDeleteOriginal = false
     @State private var isDeletingOriginal = false
@@ -55,6 +58,31 @@ struct CompressOnlyView: View {
                         .foregroundStyle(Theme.accent)
                         .font(.subheadline.weight(.semibold))
                     deleteOriginalRow
+                    Button {
+                        resetState()
+                    } label: {
+                        Text("Compress another")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 11)
+                            .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                    }
+                } else if let compressedSizeBytes, let originalSizeBytes {
+                    // Encoded but not saved yet - the user confirms before it touches Photos.
+                    sizeCompareBars(before: originalSizeBytes, after: compressedSizeBytes)
+                    if isSaving {
+                        ProgressView()
+                    } else {
+                        Button {
+                            Task { await saveResult() }
+                        } label: {
+                            Text("Save to Photos")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Theme.board)
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        }
+                    }
                 } else {
                     if let originalSizeBytes {
                         HStack {
@@ -118,7 +146,7 @@ struct CompressOnlyView: View {
                 Spacer()
             }
 
-            if !isBatchProcessing && !batchDone && player == nil {
+            if !isBatchProcessing && !batchDone {
                 Button {
                     showPicker = true
                 } label: {
@@ -128,13 +156,15 @@ struct CompressOnlyView: View {
                         .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
                 }
 
-                Button {
-                    showBatchPicker = true
-                } label: {
-                    Label("Import multiple (batch)", systemImage: "square.stack.3d.up")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 11)
-                        .foregroundStyle(Theme.inkSoft)
+                if player == nil {
+                    Button {
+                        showBatchPicker = true
+                    } label: {
+                        Label("Import multiple (batch)", systemImage: "square.stack.3d.up")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 11)
+                            .foregroundStyle(Theme.inkSoft)
+                    }
                 }
             }
         }
@@ -167,6 +197,16 @@ struct CompressOnlyView: View {
         .onAppear {
             guard player == nil, let initialURL else { return }
             load(url: initialURL)
+#if DEBUG
+            if UserDefaults.standard.bool(forKey: "debugAutoRun") {
+                Task {
+                    try? await Task.sleep(nanoseconds: 800_000_000)
+                    await compress()
+                    try? await Task.sleep(nanoseconds: 500_000_000)
+                    await saveResult()
+                }
+            }
+#endif
         }
     }
 
@@ -256,6 +296,7 @@ struct CompressOnlyView: View {
         isBatchProcessing = true
         batchResults = []
         defer { isBatchProcessing = false; batchDone = true }
+        NotificationManager.requestAuthorizationIfNeeded()
 
         let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "batch-compress")
         defer { UIApplication.shared.endBackgroundTask(backgroundTask) }
@@ -291,6 +332,11 @@ struct CompressOnlyView: View {
             try? FileManager.default.removeItem(at: outputURL)
             try? FileManager.default.removeItem(at: item.url)
         }
+
+        NotificationManager.notifyJobFinished(
+            title: "Batch compress finished",
+            body: "\(batchResults.count) video\(batchResults.count == 1 ? "" : "s") compressed and saved to Photos."
+        )
     }
 
     private var qualityPicker: some View {
@@ -315,6 +361,10 @@ struct CompressOnlyView: View {
     }
 
     private func sizeCompare(before: Int64, after: Int64) -> some View {
+        sizeCompareBars(before: before, after: after)
+    }
+
+    private func sizeCompareBars(before: Int64, after: Int64) -> some View {
         let savings = ByteFormatting.savingsPercentage(originalBytes: before, compressedBytes: after)
         let maxHeight: CGFloat = 70
         let minHeight: CGFloat = 14
@@ -334,15 +384,6 @@ struct CompressOnlyView: View {
             Text(savings >= 0 ? "-\(savings)% size" : "+\(-savings)% size, higher quality")
                 .font(.caption)
                 .foregroundStyle(Theme.inkSoft)
-
-            Button {
-                resetState()
-            } label: {
-                Text("Compress another")
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 11)
-                    .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
-            }
         }
     }
 
@@ -413,6 +454,7 @@ struct CompressOnlyView: View {
         guard let importedVideoURL else { return }
         isCompressing = true
         defer { isCompressing = false }
+        NotificationManager.requestAuthorizationIfNeeded()
 
         // Best-effort: ask iOS for extra time so compression keeps going if the user
         // backgrounds the app mid-encode, instead of being suspended immediately.
@@ -425,37 +467,58 @@ struct CompressOnlyView: View {
         let startedAt = Date()
         do {
             try await compressionService.compress(inputURL: importedVideoURL, outputURL: outputURL, tier: tier)
-            let resultBytes = fileSize(at: outputURL)
-            compressedSizeBytes = resultBytes
-            try await PhotoLibrarySaver.save(videoURL: outputURL)
-            didSave = true
-            let elapsed = Date().timeIntervalSince(startedAt)
-            if let originalSizeBytes, let resultBytes {
-                let savings = ByteFormatting.savingsPercentage(originalBytes: originalSizeBytes, compressedBytes: resultBytes)
-                historyStore.record(HistoryEntry(
-                    filename: importedVideoURL.lastPathComponent,
-                    kind: .compress,
-                    resultTag: "-\(savings)%",
-                    originalBytes: originalSizeBytes,
-                    resultBytes: resultBytes,
-                    sourceDurationSeconds: sourceDurationSeconds,
-                    processingSeconds: elapsed
-                ))
-            }
-            try? FileManager.default.removeItem(at: outputURL)
+            compressedSizeBytes = fileSize(at: outputURL)
+            pendingOutputURL = outputURL
+            pendingElapsedSeconds = Date().timeIntervalSince(startedAt)
+            // Encoding is done, but nothing touches Photos until the user taps Save.
         } catch {
             errorMessage = error.localizedDescription
             try? FileManager.default.removeItem(at: outputURL)
         }
     }
 
+    private func saveResult() async {
+        guard let pendingOutputURL, let importedVideoURL else { return }
+        isSaving = true
+        defer { isSaving = false }
+        do {
+            try await PhotoLibrarySaver.save(videoURL: pendingOutputURL)
+            didSave = true
+            NotificationManager.notifyJobFinished(
+                title: "Compress finished",
+                body: "\(importedVideoURL.lastPathComponent) is ready in Photos."
+            )
+            if let originalSizeBytes, let compressedSizeBytes {
+                let savings = ByteFormatting.savingsPercentage(originalBytes: originalSizeBytes, compressedBytes: compressedSizeBytes)
+                historyStore.record(HistoryEntry(
+                    filename: importedVideoURL.lastPathComponent,
+                    kind: .compress,
+                    resultTag: "-\(savings)%",
+                    originalBytes: originalSizeBytes,
+                    resultBytes: compressedSizeBytes,
+                    sourceDurationSeconds: sourceDurationSeconds,
+                    processingSeconds: pendingElapsedSeconds
+                ))
+            }
+            try? FileManager.default.removeItem(at: pendingOutputURL)
+            self.pendingOutputURL = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     private func resetState() {
+        if let pendingOutputURL {
+            try? FileManager.default.removeItem(at: pendingOutputURL)
+        }
         importedVideoURL = nil
         importedAssetIdentifier = nil
         player = nil
         originalSizeBytes = nil
         sourceDurationSeconds = nil
         compressedSizeBytes = nil
+        pendingOutputURL = nil
+        pendingElapsedSeconds = nil
         didSave = false
         didDeleteOriginal = false
         errorMessage = nil

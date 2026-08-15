@@ -33,7 +33,7 @@ enum CompressionTier: String, CaseIterable, Identifiable {
 enum StorySegmentDuration: Int, CaseIterable, Identifiable {
     case fifteen = 15
     case thirty = 30
-    case sixty = 60
+    case fiftyNine = 59
     case ninety = 90
 
     var id: Int { rawValue }

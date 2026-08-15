@@ -8,13 +8,17 @@ Filming yourself on an iPhone means you almost always stumble a line, say it twi
 
 ## Features
 
-- **On-device video compression** — re-encodes to H.265/HEVC using the iPhone's hardware encoder (`hevc_videotoolbox`), with real-time VideoToolbox mode for faster exports. No upload, no server, no account required.
-- **Silence & retake detection** *(bonus, not in-app)* — transcribes the audio, finds silence gaps and repeated phrases, and surfaces a review screen where you pick which take to keep. Fully implemented and tested in isolation, but not linked from Home — see Status.
-- **Record with teleprompter** *(bonus, not in-app)* — native camera capture with an auto-scrolling script overlay, chained into Compress/Cut. Also implemented and not linked from Home.
-- **Delete original from Photos** (opt-in) — reclaim storage after compressing, without losing the source unless you choose to.
-- **Local run history** — every compress/cut session is logged on-device.
-- **Nine implemented screens** — splash, onboarding, auth, home, compress, processing, retake review, history, and account.
-- **Local-only auth** — the account flow runs entirely against the Keychain out of the box; no backend is required to build and run the app.
+- **On-device video compression** — re-encodes to H.265/HEVC using the iPhone's hardware encoder (`hevc_videotoolbox`), with real-time VideoToolbox mode for faster exports. No upload, no server. Batch mode compresses a whole queue back to back, and shows the estimated size/savings before you commit.
+- **Silence & retake detection** — transcribes the audio, finds silence gaps and repeated phrases, and surfaces a review screen where you pick which take to keep. The one thing no other native iOS video app does — this exists in desktop editing plugins, not on iPhone.
+- **Split for Stories** — slices one long recording into ordered, fixed-length clips (10–60s) using ffmpeg's segment muxer, no re-encode. Ready-made Stories/Reels posting queue.
+- **Find duplicates** — scans the Photos library for videos with matching length and creation day (the copies Compress and re-imports tend to leave behind), groups them, suggests a keeper, deletes only what you confirm. Public-API-only, entirely on-device.
+- **Record with teleprompter** *(bonus, not linked from Home yet)* — native camera capture with an auto-scrolling script overlay, chained into Compress/Cut.
+- **Delete original from Photos** (opt-in, before or after compressing) — reclaim storage without losing the source unless you choose to.
+- **Account deletion** — in-app, self-service (Apple 5.1.1(v) compliant), plus a working forgot-password flow.
+- **Local notifications** — get told when a compress/cut/split/batch job finishes instead of watching a progress bar.
+- **Local run history** — every session logged on-device, with a delete-able list, before/after size, and processing time.
+- **Light/dark appearance toggle**, selectable default compression quality.
+- **Real Supabase-backed auth** — accounts are real, not just local Keychain state.
 
 ## Tech stack
 

@@ -12,14 +12,37 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     }
 }
 
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system, light, dark
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .system: return "Auto"
+        case .light: return "Light"
+        case .dark: return "Dark"
+        }
+    }
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+}
+
 struct AccountView: View {
     @EnvironmentObject private var accountStore: AccountStore
     @EnvironmentObject private var historyStore: HistoryStore
 
     @State private var apiKey: String = APIKeyStore.load() ?? ""
     @State private var savedConfirmation = false
+    @State private var showDeleteConfirmation = false
+    @State private var isDeletingAccount = false
+    @State private var deleteErrorMessage: String?
     @AppStorage("compressionTier") private var tierRawValue = CompressionTier.balanced.rawValue
     @AppStorage("appLanguage") private var languageRawValue = AppLanguage.en.rawValue
+    @AppStorage("appAppearance") private var appearanceRawValue = AppAppearance.system.rawValue
 
     var body: some View {
         Form {
@@ -51,6 +74,7 @@ struct AccountView: View {
                         stat(value: "\(historyStore.entries.count)", label: "videos edited")
                         stat(value: "\(compressCount)", label: "compressed")
                         stat(value: "\(cutCount)", label: "cut")
+                        stat(value: "\(splitCount)", label: "split")
                     }
                     HStack(spacing: 10) {
                         stat(value: ByteFormatting.humanReadableSize(historyStore.totalBytesSaved), label: "space saved")
@@ -78,12 +102,21 @@ struct AccountView: View {
                         Text(language.label).tag(language.rawValue)
                     }
                 }
-                HStack {
-                    Text("Default compression quality")
-                    Spacer()
-                    Text((CompressionTier(rawValue: tierRawValue) ?? .balanced).label)
-                        .foregroundStyle(Theme.inkSoft)
+                Picker("Appearance", selection: $appearanceRawValue) {
+                    ForEach(AppAppearance.allCases) { appearance in
+                        Text(appearance.label).tag(appearance.rawValue)
+                    }
                 }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Default compression quality")
+                    Picker("Default compression quality", selection: $tierRawValue) {
+                        ForEach(CompressionTier.allCases) { tier in
+                            Text(tier.label).tag(tier.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                .padding(.vertical, 4)
             }
 
             Section("About") {
@@ -117,8 +150,51 @@ struct AccountView: View {
                     accountStore.signOut()
                 }
             }
+
+            Section {
+                if isDeletingAccount {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                } else {
+                    Button("Delete account", role: .destructive) {
+                        showDeleteConfirmation = true
+                    }
+                }
+            } footer: {
+                Text("Permanently deletes your account and login. Videos already saved to your Photos library are not affected.")
+            }
         }
         .navigationTitle("Account")
+        .confirmationDialog(
+            "Delete your account?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Delete account", role: .destructive) {
+                Task { await deleteAccount() }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This can't be undone. Your login and account data will be permanently removed.")
+        }
+        .alert("Could not delete account", isPresented: .constant(deleteErrorMessage != nil), actions: {
+            Button("OK") { deleteErrorMessage = nil }
+        }, message: {
+            Text(deleteErrorMessage ?? "")
+        })
+    }
+
+    private func deleteAccount() async {
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+        do {
+            try await accountStore.deleteAccount()
+        } catch {
+            deleteErrorMessage = error.localizedDescription
+        }
     }
 
     private var initials: String {
@@ -134,6 +210,10 @@ struct AccountView: View {
 
     private var cutCount: Int {
         historyStore.entries.filter { $0.kind == .cut }.count
+    }
+
+    private var splitCount: Int {
+        historyStore.entries.filter { $0.kind == .split }.count
     }
 
     private var lastActivityLabel: String {

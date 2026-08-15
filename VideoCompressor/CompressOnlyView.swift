@@ -40,6 +40,7 @@ struct CompressOnlyView: View {
     private var tier: CompressionTier { CompressionTier(rawValue: tierRawValue) ?? .balanced }
 
     var body: some View {
+        ScrollView {
         VStack(spacing: 20) {
             if isBatchProcessing || batchDone {
                 batchProgressView
@@ -169,6 +170,7 @@ struct CompressOnlyView: View {
             }
         }
         .padding()
+        }
         .background(Theme.paper)
         .navigationTitle("Compress")
         .navigationBarTitleDisplayMode(.inline)
@@ -232,16 +234,20 @@ struct CompressOnlyView: View {
                 }
                 .padding(.top, 20)
             } else if batchDone {
-                VStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 36))
-                        .foregroundStyle(Theme.accent)
-                    Text("\(batchResults.count) video\(batchResults.count == 1 ? "" : "s") compressed")
-                        .font(.headline)
-                    let totalSaved = batchResults.reduce(Int64(0)) { $0 + max(0, $1.before - $1.after) }
-                    Text("\(ByteFormatting.humanReadableSize(totalSaved)) saved in total")
-                        .font(.subheadline)
-                        .foregroundStyle(Theme.inkSoft)
+                VStack(spacing: 14) {
+                    VStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 36))
+                            .foregroundStyle(Theme.accent)
+                        Text("\(batchResults.count) video\(batchResults.count == 1 ? "" : "s") compressed")
+                            .font(.headline)
+                    }
+
+                    let totalBefore = batchResults.reduce(Int64(0)) { $0 + $1.before }
+                    let totalAfter = batchResults.reduce(Int64(0)) { $0 + $1.after }
+                    if totalBefore > 0 {
+                        sizeCompareBars(before: totalBefore, after: totalAfter)
+                    }
                 }
                 .padding(.top, 20)
             }

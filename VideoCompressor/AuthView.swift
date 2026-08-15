@@ -10,6 +10,10 @@ struct AuthView: View {
     @State private var password = ""
     @State private var errorMessage: String?
     @State private var isSubmitting = false
+    @State private var showForgotPassword = false
+    @State private var resetEmail = ""
+    @State private var isSendingReset = false
+    @State private var resetSent = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -71,21 +75,89 @@ struct AuthView: View {
             }
             .disabled(isSubmitting)
 
-            HStack {
-                Rectangle().fill(Theme.line).frame(height: 1)
-                Text("or").font(.caption2).foregroundStyle(Theme.inkSoft)
-                Rectangle().fill(Theme.line).frame(height: 1)
+            if mode == .logIn {
+                Button {
+                    resetEmail = email
+                    resetSent = false
+                    showForgotPassword = true
+                } label: {
+                    Text("Forgot password?")
+                        .font(.caption)
+                        .foregroundStyle(Theme.inkSoft)
+                }
             }
+        }
+        .sheet(isPresented: $showForgotPassword) {
+            forgotPasswordSheet
+        }
+    }
 
-            Button {
-                errorMessage = "Sign in with Apple is not connected yet."
-            } label: {
-                Label("Continue with Apple", systemImage: "apple.logo")
+    private var forgotPasswordSheet: some View {
+        VStack(spacing: 20) {
+            Spacer(minLength: 12)
+            Image(systemName: "key.fill")
+                .font(.system(size: 34))
+                .foregroundStyle(Theme.accent)
+
+            if resetSent {
+                Text("Check your email").font(Theme.displayFont(18))
+                Text("We sent a password reset link to \(resetEmail). Tap it, set a new password, then log in.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.inkSoft)
+                    .multilineTextAlignment(.center)
+                Button {
+                    showForgotPassword = false
+                } label: {
+                    Text("Done")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Theme.board)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                }
+            } else {
+                Text("Reset password").font(Theme.displayFont(18))
+                Text("We'll send a reset link to your email.")
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.inkSoft)
+                field(label: "Email", text: $resetEmail, placeholder: "you@email.com", keyboard: .emailAddress)
+                Button {
+                    Task { await sendReset() }
+                } label: {
+                    Group {
+                        if isSendingReset {
+                            ProgressView().tint(.white)
+                        } else {
+                            Text("Send reset link")
+                        }
+                    }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
-                    .foregroundStyle(Theme.ink)
+                    .background(Theme.board)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                }
+                .disabled(isSendingReset || resetEmail.isEmpty)
             }
+            Spacer()
+        }
+        .padding(24)
+        .background(Theme.paper)
+        .alert("Could not continue", isPresented: .constant(errorMessage != nil), actions: {
+            Button("OK") { errorMessage = nil }
+        }, message: {
+            Text(errorMessage ?? "")
+        })
+    }
+
+    private func sendReset() async {
+        isSendingReset = true
+        defer { isSendingReset = false }
+        do {
+            try await accountStore.requestPasswordReset(email: resetEmail)
+            resetSent = true
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 

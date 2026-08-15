@@ -63,6 +63,24 @@ final class AccountStore: ObservableObject {
         deleteTokens()
     }
 
+    func requestPasswordReset(email: String) async throws {
+        let email = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !email.isEmpty else { throw AccountError.missingFields }
+        try await SupabaseAuthClient.requestPasswordReset(email: email)
+    }
+
+    /// Apple 5.1.1(v): apps that support account creation must support in-app account
+    /// deletion. Deletes the row server-side (RPC scoped to the caller's own auth.uid()),
+    /// then clears everything local the same way signOut does.
+    func deleteAccount() async throws {
+        guard let tokens = loadTokens() else {
+            signOut()
+            return
+        }
+        try await SupabaseAuthClient.deleteAccount(accessToken: tokens.accessToken)
+        signOut()
+    }
+
     private func applySession(_ supabaseSession: SupabaseSession) {
         pendingConfirmationEmail = nil
         let account = AccountSession(name: supabaseSession.name, email: supabaseSession.email, createdAt: supabaseSession.createdAt)
@@ -95,5 +113,19 @@ final class AccountStore: ObservableObject {
             kSecAttrAccount as String: "tokens",
         ]
         SecItemDelete(query as CFDictionary)
+    }
+
+    private func loadTokens() -> SupabaseSession? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: "tokens",
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess, let data = result as? Data else { return nil }
+        return try? JSONDecoder().decode(SupabaseSession.self, from: data)
     }
 }

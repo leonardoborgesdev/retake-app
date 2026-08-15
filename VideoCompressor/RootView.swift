@@ -4,6 +4,7 @@ struct RootView: View {
     @EnvironmentObject private var accountStore: AccountStore
     @State private var showingSplash = true
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @AppStorage("appAppearance") private var appearanceRawValue = AppAppearance.system.rawValue
 
     var body: some View {
         Group {
@@ -17,6 +18,7 @@ struct RootView: View {
                 AuthView()
             }
         }
+        .preferredColorScheme((AppAppearance(rawValue: appearanceRawValue) ?? .system).colorScheme)
     }
 }
 

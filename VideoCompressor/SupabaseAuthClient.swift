@@ -123,6 +123,31 @@ enum SupabaseAuthClient {
         return try decodeSession(data)
     }
 
+    /// Sends a password-reset email via GoTrue's /recover endpoint. Always returns
+    /// success from the server regardless of whether the email exists, to avoid leaking
+    /// which addresses have accounts.
+    static func requestPasswordReset(email: String) async throws {
+        var request = makeRequest(url: baseURL.appendingPathComponent("auth/v1/recover"))
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["email": email])
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try checkStatus(response, data: data)
+    }
+
+    /// Calls the `delete_own_account` Postgres RPC (SECURITY DEFINER, scoped to
+    /// auth.uid() server-side) with the user's own access token - satisfies Apple's
+    /// 5.1.1(v) in-app account deletion requirement without needing the service role key
+    /// on-device.
+    static func deleteAccount(accessToken: String) async throws {
+        let url = baseURL.appendingPathComponent("rest/v1/rpc/delete_own_account")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue(anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try checkStatus(response, data: data)
+    }
+
     private static func makeRequest(url: URL) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"

@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 enum VideoPickerError: LocalizedError {
     case unsupportedItem
     case loadFailed(String)
+    case cancelled
 
     var errorDescription: String? {
         switch self {
@@ -12,6 +13,8 @@ enum VideoPickerError: LocalizedError {
             return "The selected item is not a supported video."
         case .loadFailed(let message):
             return "Failed to import the video: \(message)"
+        case .cancelled:
+            return "Import was cancelled."
         }
     }
 }
@@ -62,7 +65,25 @@ struct VideoPicker: UIViewControllerRepresentable {
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             picker.dismiss(animated: true)
 
-            guard let result = results.first else { return }
+            // Capture the closures as local values (not through self) so delivery never
+            // depends on this Coordinator still being alive when the async load finishes -
+            // previously used [weak self] here, and if SwiftUI tore the coordinator down
+            // mid-load (large/iCloud video, slow network), self?.deliver(...) silently
+            // became a no-op: onPicked never fired, and the screen stayed on "Preparing
+            // video..." forever with no way out.
+            let onPicked = self.onPicked
+            let onImportStart = self.onImportStart
+
+            func deliver(_ result: Result<PickedVideo, Error>) {
+                DispatchQueue.main.async {
+                    onPicked(result)
+                }
+            }
+
+            guard let result = results.first else {
+                deliver(.failure(VideoPickerError.cancelled))
+                return
+            }
             let provider = result.itemProvider
             let assetIdentifier = result.assetIdentifier
 
@@ -75,17 +96,17 @@ struct VideoPicker: UIViewControllerRepresentable {
             // Large or iCloud-only videos can take a while to export - signal "started"
             // now, before the (possibly long) load, so the caller can show a spinner
             // instead of the screen looking frozen with nothing selected.
-            DispatchQueue.main.async { [onImportStart] in
+            DispatchQueue.main.async {
                 onImportStart?()
             }
 
-            provider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { [weak self] url, error in
+            provider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
                 if let error {
-                    self?.deliver(.failure(VideoPickerError.loadFailed(error.localizedDescription)))
+                    deliver(.failure(VideoPickerError.loadFailed(error.localizedDescription)))
                     return
                 }
                 guard let url else {
-                    self?.deliver(.failure(VideoPickerError.loadFailed("empty URL")))
+                    deliver(.failure(VideoPickerError.loadFailed("empty URL")))
                     return
                 }
 
@@ -95,19 +116,10 @@ struct VideoPicker: UIViewControllerRepresentable {
                         .appendingPathComponent("import-\(UUID().uuidString)")
                         .appendingPathExtension(fileExtension)
                     try FileManager.default.copyItem(at: url, to: copy)
-                    self?.deliver(.success(PickedVideo(url: copy, assetIdentifier: assetIdentifier)))
+                    deliver(.success(PickedVideo(url: copy, assetIdentifier: assetIdentifier)))
                 } catch {
-                    self?.deliver(.failure(VideoPickerError.loadFailed(error.localizedDescription)))
+                    deliver(.failure(VideoPickerError.loadFailed(error.localizedDescription)))
                 }
-            }
-        }
-
-        /// loadFileRepresentation's completion handler fires on a background queue, but
-        /// onPicked drives @State in a SwiftUI view - mutating that off the main thread
-        /// causes half-applied UI updates (e.g. a label appearing with its value missing).
-        private func deliver(_ result: Result<PickedVideo, Error>) {
-            DispatchQueue.main.async { [onPicked] in
-                onPicked(result)
             }
         }
     }

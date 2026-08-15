@@ -31,10 +31,11 @@ enum CompressionTier: String, CaseIterable, Identifiable {
 /// Segment length options offered on the Stories-split screen - kept to values that
 /// map cleanly onto real Stories/Reels formats instead of an arbitrary free-typed number.
 enum StorySegmentDuration: Int, CaseIterable, Identifiable {
+    case ten = 10
     case fifteen = 15
     case thirty = 30
-    case fiftyNine = 59
-    case ninety = 90
+    case fortyFive = 45
+    case sixty = 60
 
     var id: Int { rawValue }
     var label: String { "\(rawValue)s" }

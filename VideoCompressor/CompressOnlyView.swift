@@ -22,6 +22,7 @@ struct CompressOnlyView: View {
     @State private var didSave = false
     @State private var didDeleteOriginal = false
     @State private var isDeletingOriginal = false
+    @State private var deleteOriginalAfterSave = false
     @State private var errorMessage: String?
     @AppStorage("compressionTier") private var tierRawValue = CompressionTier.balanced.rawValue
 
@@ -34,6 +35,7 @@ struct CompressOnlyView: View {
     @State private var batchIndex = 0
     @State private var batchResults: [(filename: String, before: Int64, after: Int64)] = []
     @State private var batchDone = false
+    @State private var deleteOriginalsAfterBatch = false
 
     @StateObject private var compressionService = VideoCompressionService()
 
@@ -97,6 +99,14 @@ struct CompressOnlyView: View {
                     }
 
                     qualityPicker
+
+                    if importedAssetIdentifier != nil {
+                        Toggle(isOn: $deleteOriginalAfterSave) {
+                            Label("Delete original after saving", systemImage: "trash")
+                                .font(.caption)
+                        }
+                        .tint(Theme.discard)
+                    }
 
                     Button {
                         Task { await compress() }
@@ -166,6 +176,12 @@ struct CompressOnlyView: View {
                             .padding(.vertical, 11)
                             .foregroundStyle(Theme.inkSoft)
                     }
+
+                    Toggle(isOn: $deleteOriginalsAfterBatch) {
+                        Label("Delete originals after batch", systemImage: "trash")
+                            .font(.caption)
+                    }
+                    .tint(Theme.discard)
                 }
             }
         }
@@ -319,6 +335,9 @@ struct CompressOnlyView: View {
                 try await compressionService.compress(inputURL: item.url, outputURL: outputURL, tier: tier)
                 let after = fileSize(at: outputURL) ?? 0
                 try await PhotoLibrarySaver.save(videoURL: outputURL)
+                if deleteOriginalsAfterBatch, let assetIdentifier = item.assetIdentifier {
+                    try? await PhotoLibrarySaver.deleteAsset(identifier: assetIdentifier)
+                }
                 let elapsed = Date().timeIntervalSince(startedAt)
                 let savings = ByteFormatting.savingsPercentage(originalBytes: before, compressedBytes: after)
                 historyStore.record(HistoryEntry(
@@ -361,6 +380,12 @@ struct CompressOnlyView: View {
                     Text("Estimated size: ~\(ByteFormatting.humanReadableSize(estimate))")
                         .font(.caption2)
                         .foregroundStyle(Theme.inkSoft)
+                    if let originalSizeBytes, originalSizeBytes > 0 {
+                        let estimatedSavings = ByteFormatting.savingsPercentage(originalBytes: originalSizeBytes, compressedBytes: estimate)
+                        Text("(~\(estimatedSavings)% smaller)")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(Theme.accent)
+                    }
                 }
             }
         }
@@ -508,6 +533,11 @@ struct CompressOnlyView: View {
             }
             try? FileManager.default.removeItem(at: pendingOutputURL)
             self.pendingOutputURL = nil
+
+            if deleteOriginalAfterSave, let importedAssetIdentifier {
+                try? await PhotoLibrarySaver.deleteAsset(identifier: importedAssetIdentifier)
+                didDeleteOriginal = true
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -527,6 +557,7 @@ struct CompressOnlyView: View {
         pendingElapsedSeconds = nil
         didSave = false
         didDeleteOriginal = false
+        deleteOriginalAfterSave = false
         errorMessage = nil
     }
 

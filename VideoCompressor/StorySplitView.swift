@@ -27,7 +27,7 @@ struct StorySplitView: View {
     @State private var importedVideoURL: URL?
     @State private var player: AVPlayer?
     @State private var sourceDurationSeconds: Double?
-    @State private var segmentDuration: StorySegmentDuration = .fiftyNine
+    @State private var segmentDuration: StorySegmentDuration = .thirty
     @State private var isSplitting = false
     @State private var splitProgress: Double = 0
     @State private var resultURLs: [URL] = []

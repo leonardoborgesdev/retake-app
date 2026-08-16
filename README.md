@@ -60,11 +60,12 @@ To run on a physical device, open the project in Xcode, pick the device, and hit
 
 Real screenshots, iPhone 17 Simulator, iOS 26.5:
 
-| Onboarding | Login | Home | Account |
-|---|---|---|---|
-| ![onboarding](docs/screenshots/onboarding.png) | ![login](docs/screenshots/login.png) | ![home](docs/screenshots/home.png) | ![account](docs/screenshots/account.png) |
+| Onboarding | Home | Compress | Login | Account |
+|---|---|---|---|---|
+| ![onboarding](docs/screenshots/onboarding.png) | ![home](docs/screenshots/home.png) | ![compress](docs/screenshots/compress.png) | ![login](docs/screenshots/login.png) | ![account](docs/screenshots/account.png) |
 
-*(Screenshots predate the build-14 Liquid Glass pass and the Find Duplicates/Split for Stories tools on Home — updated captures are coming.)*
+Home, Onboarding, and Compress reflect build 14 — native iOS 26 Liquid Glass and all
+four tools (Compress, Cut, Find Duplicates, Split for Stories).
 
 Full visual identity reference (logo, palette, type, and every screen mocked up before implementation) is in `docs/design-mockup.md`.
 

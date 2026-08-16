@@ -69,7 +69,7 @@ struct StorySplitView: View {
                             if sourceDurationSeconds == nil {
                                 Text("Reading video…")
                             } else {
-                                Text("Split into ") + Text("\(expectedCount) ") + Text("clips")
+                                Text("Split into ") + Text("\(expectedCount) ") + Text(expectedCount == 1 ? "clip" : "clips")
                             }
                         }
                             .frame(maxWidth: .infinity)
@@ -173,7 +173,7 @@ struct StorySplitView: View {
 
             HStack(spacing: 6) {
                 Image(systemName: "square.stack.3d.up").font(.caption2).foregroundStyle(Theme.inkSoft)
-                (Text("Will produce ") + Text("\(expectedCount) ") + Text("clips, in order"))
+                (Text("Will produce ") + Text("\(expectedCount) ") + Text(expectedCount == 1 ? "clip, in order" : "clips, in order"))
                     .font(.caption2)
                     .foregroundStyle(Theme.inkSoft)
             }

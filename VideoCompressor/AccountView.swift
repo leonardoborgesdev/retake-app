@@ -158,14 +158,14 @@ struct AccountView: View {
                 }
                 Picker("Appearance", selection: $appearanceRawValue) {
                     ForEach(AppAppearance.allCases) { appearance in
-                        Text(appearance.label).tag(appearance.rawValue)
+                        Text(LocalizedStringKey(appearance.label)).tag(appearance.rawValue)
                     }
                 }
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Default compression quality")
                     Picker("Default compression quality", selection: $tierRawValue) {
                         ForEach(CompressionTier.allCases) { tier in
-                            Text(tier.label).tag(tier.rawValue)
+                            Text(LocalizedStringKey(tier.label)).tag(tier.rawValue)
                         }
                     }
                     .pickerStyle(.segmented)

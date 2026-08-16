@@ -1,6 +1,11 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "(~" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "(~" } } } },
+    "% smaller)" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "% menor)" } } } },
+    "% bigger)" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "% maior)" } } } },
+    "clip" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "clipe" } } } },
+    "clip, in order" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "clipe, em ordem" } } } },
     "Compress" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Comprimir" } } } },
     "Compress video" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Comprimir vídeo" } } } },
     "Cut silence & retakes" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Cortar silêncio e retakes" } } } },

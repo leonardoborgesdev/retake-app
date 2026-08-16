@@ -280,7 +280,7 @@ struct CompressOnlyView: View {
                 Text("Quality").font(.caption).foregroundStyle(Theme.inkSoft)
                 Picker("Quality", selection: $tierRawValue) {
                     ForEach(CompressionTier.allCases) { tier in
-                        Text(tier.label).tag(tier.rawValue)
+                        Text(LocalizedStringKey(tier.label)).tag(tier.rawValue)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -489,7 +489,7 @@ struct CompressOnlyView: View {
         VStack(alignment: .leading, spacing: 8) {
             Picker("Quality", selection: $tierRawValue) {
                 ForEach(CompressionTier.allCases) { tier in
-                    Text(tier.label).tag(tier.rawValue)
+                    Text(LocalizedStringKey(tier.label)).tag(tier.rawValue)
                 }
             }
             .pickerStyle(.segmented)
@@ -503,7 +503,13 @@ struct CompressOnlyView: View {
                         .foregroundStyle(Theme.inkSoft)
                     if let originalSizeBytes, originalSizeBytes > 0 {
                         let estimatedSavings = ByteFormatting.savingsPercentage(originalBytes: originalSizeBytes, compressedBytes: estimate)
-                        Text("(~\(estimatedSavings)% smaller)")
+                        Group {
+                            if estimatedSavings >= 0 {
+                                Text("(~") + Text("\(estimatedSavings)") + Text("% smaller)")
+                            } else {
+                                Text("(~") + Text("\(-estimatedSavings)") + Text("% bigger)")
+                            }
+                        }
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(Theme.accent)
                     }

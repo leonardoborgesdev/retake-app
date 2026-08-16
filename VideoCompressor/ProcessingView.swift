@@ -23,6 +23,7 @@ private func stepIndex(for stage: EditingStage) -> Int? {
 
 struct ProcessingView: View {
     let stage: EditingStage
+    let startedAt: Date
 
     @State private var spinDegrees = 0.0
 
@@ -38,6 +39,19 @@ struct ProcessingView: View {
                     .font(Theme.displayFont(20))
                     .foregroundStyle(Theme.accent)
                 Spacer()
+            }
+
+            // No continuous progress fraction here (just 5 discrete stages), so unlike
+            // Compress this only shows elapsed time, not an ETA - a stage can be a
+            // transcription call of unpredictable length, not a steady byte stream.
+            TimelineView(.periodic(from: startedAt, by: 1)) { context in
+                let elapsed = context.date.timeIntervalSince(startedAt)
+                HStack(spacing: 4) {
+                    Text(Self.formatDuration(elapsed))
+                    Text("elapsed")
+                }
+                .font(.caption2)
+                .foregroundStyle(Theme.inkSoft)
             }
 
             GeometryReader { geo in
@@ -90,8 +104,15 @@ struct ProcessingView: View {
             spinDegrees = 360
         }
     }
+
+    private static func formatDuration(_ seconds: Double) -> String {
+        let total = max(0, Int(seconds.rounded()))
+        let minutes = total / 60
+        let secs = total % 60
+        return minutes > 0 ? "\(minutes)m \(secs)s" : "\(secs)s"
+    }
 }
 
 #Preview {
-    ProcessingView(stage: .detectingSilence).padding()
+    ProcessingView(stage: .detectingSilence, startedAt: Date()).padding()
 }

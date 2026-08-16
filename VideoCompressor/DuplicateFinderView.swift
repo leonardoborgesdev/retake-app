@@ -116,14 +116,17 @@ struct DuplicateFinderView: View {
                             assetRow(asset, isSuggestedKeep: index == group.assets.count - 1)
                         }
                     } header: {
-                        Text("\(Int(group.durationSeconds))s · \(group.assets.count) copies")
+                        // Split so the trailing word is a plain literal Text - reliably
+                        // localizable via an exact Localizable.xcstrings match, unlike the
+                        // numbers-plus-interpolation part ahead of it.
+                        Text("\(Int(group.durationSeconds))s · \(group.assets.count) ") + Text("copies")
                     }
                 }
             }
             .scrollContentBackground(.hidden)
 
             VStack(spacing: 10) {
-                Text("\(selectedIdentifiers.count) selected for deletion")
+                (Text("\(selectedIdentifiers.count) ") + Text("selected for deletion"))
                     .font(.caption)
                     .foregroundStyle(Theme.inkSoft)
                 Button(role: .destructive) {

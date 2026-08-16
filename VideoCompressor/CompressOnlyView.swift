@@ -11,6 +11,7 @@ struct CompressOnlyView: View {
     @State private var showPaywall = false
     @State private var paywallReason = "You've used all 10 free videos today."
     @State private var pendingHistoryID: UUID?
+    @State private var compressStartedAt: Date?
 
     @State private var showPicker = false
     @State private var isImporting = false
@@ -59,8 +60,8 @@ struct CompressOnlyView: View {
                     .frame(height: 200)
                     .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
 
-                if isCompressing {
-                    CompressProgressView(progress: compressionService.progress) {
+                if isCompressing, let compressStartedAt {
+                    CompressProgressView(progress: compressionService.progress, startedAt: compressStartedAt) {
                         compressionService.cancel()
                     }
                 } else if didSave, let compressedSizeBytes, let originalSizeBytes {
@@ -128,7 +129,7 @@ struct CompressOnlyView: View {
                     }
 
                     if !subscriptionStore.isSubscribed {
-                        Text("\(usageLimiter.remainingToday) of \(UsageLimiter.dailyFreeLimit) free videos left today")
+                        (Text("\(usageLimiter.remainingToday) ") + Text("of") + Text(" \(UsageLimiter.dailyFreeLimit) ") + Text("free videos left today"))
                             .font(.caption2)
                             .foregroundStyle(Theme.inkSoft)
                     }
@@ -246,10 +247,10 @@ struct CompressOnlyView: View {
     private var batchReviewView: some View {
         VStack(spacing: 20) {
             VStack(spacing: 4) {
-                Text("\(batchQueue.count) video\(batchQueue.count == 1 ? "" : "s") selected")
+                (Text("\(batchQueue.count) ") + Text("videos selected"))
                     .font(.headline)
                 let totalSize = batchQueue.reduce(Int64(0)) { $0 + (fileSize(at: $1.url) ?? 0) }
-                Text("Total: \(ByteFormatting.humanReadableSize(totalSize))")
+                (Text("Total: ") + Text(ByteFormatting.humanReadableSize(totalSize)))
                     .font(.caption)
                     .foregroundStyle(Theme.inkSoft)
             }
@@ -299,7 +300,7 @@ struct CompressOnlyView: View {
                 showBatchReview = false
                 Task { await processBatch() }
             } label: {
-                Text("Compress \(batchQueue.count) video\(batchQueue.count == 1 ? "" : "s")")
+                (Text("Compress") + Text(" \(batchQueue.count) ") + Text("videos"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
                     .background(Theme.board)
@@ -323,7 +324,7 @@ struct CompressOnlyView: View {
         VStack(spacing: 16) {
             if isBatchProcessing {
                 VStack(spacing: 10) {
-                    Text("Compressing \(batchIndex + 1) of \(batchQueue.count)")
+                    (Text("Compressing") + Text(" \(batchIndex + 1) ") + Text("of") + Text(" \(batchQueue.count)"))
                         .font(.headline)
                     Text(batchQueue.indices.contains(batchIndex) ? batchQueue[batchIndex].url.lastPathComponent : "")
                         .font(.caption)
@@ -346,7 +347,7 @@ struct CompressOnlyView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 36))
                             .foregroundStyle(Theme.accent)
-                        Text("\(batchResults.count) video\(batchResults.count == 1 ? "" : "s") compressed")
+                        (Text("\(batchResults.count) ") + Text("videos compressed"))
                             .font(.headline)
                     }
 
@@ -592,6 +593,7 @@ struct CompressOnlyView: View {
             return
         }
         isCompressing = true
+        compressStartedAt = Date()
         defer { isCompressing = false }
         NotificationManager.requestAuthorizationIfNeeded()
 
@@ -705,6 +707,7 @@ struct CompressOnlyView: View {
 /// separate phases.
 private struct CompressProgressView: View {
     let progress: Double
+    let startedAt: Date
     let onCancel: () -> Void
 
     private var steps: [(title: String, threshold: Double)] {
@@ -720,6 +723,23 @@ private struct CompressProgressView: View {
                 Spacer()
                 Button("Cancel", role: .destructive, action: onCancel)
                     .font(.caption)
+            }
+
+            // Ticks once a second so elapsed/remaining stay live without a manual Timer.
+            TimelineView(.periodic(from: startedAt, by: 1)) { context in
+                let elapsed = context.date.timeIntervalSince(startedAt)
+                HStack(spacing: 4) {
+                    Text(Self.formatDuration(elapsed))
+                    Text("elapsed")
+                    if progress > 0.02 {
+                        Text("·")
+                        // Classic ETA: remaining = elapsed * (1 - fractionDone) / fractionDone.
+                        Text(Self.formatDuration(elapsed * (1 - progress) / progress))
+                        Text("remaining")
+                    }
+                }
+                .font(.caption2)
+                .foregroundStyle(Theme.inkSoft)
             }
 
             GeometryReader { geo in
@@ -759,6 +779,13 @@ private struct CompressProgressView: View {
         .padding(16)
         .background(Theme.surface2)
         .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+    }
+
+    private static func formatDuration(_ seconds: Double) -> String {
+        let total = max(0, Int(seconds.rounded()))
+        let minutes = total / 60
+        let secs = total % 60
+        return minutes > 0 ? "\(minutes)m \(secs)s" : "\(secs)s"
     }
 }
 

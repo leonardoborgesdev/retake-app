@@ -29,8 +29,8 @@ struct CutOnlyView: View {
                     .frame(height: 200)
                     .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
 
-                if editingPipeline.stage != .idle && editingPipeline.stage != .done {
-                    ProcessingView(stage: editingPipeline.stage)
+                if editingPipeline.stage != .idle && editingPipeline.stage != .done, let pipelineStartedAt {
+                    ProcessingView(stage: editingPipeline.stage, startedAt: pipelineStartedAt)
                 } else if isSaving {
                     ProgressView()
                     Text("Saving to Photos...")
@@ -52,7 +52,7 @@ struct CutOnlyView: View {
                             .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                     if !subscriptionStore.isSubscribed {
-                        Text("\(usageLimiter.remainingToday) of \(UsageLimiter.dailyFreeLimit) free videos left today")
+                        (Text("\(usageLimiter.remainingToday) ") + Text("of") + Text(" \(UsageLimiter.dailyFreeLimit) ") + Text("free videos left today"))
                             .font(.caption2)
                             .foregroundStyle(Theme.inkSoft)
                     }

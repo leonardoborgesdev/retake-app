@@ -58,7 +58,16 @@ struct StorySplitView: View {
                             showPaywall = true
                         }
                     } label: {
-                        Text(sourceDurationSeconds == nil ? "Reading video…" : "Split into \(expectedCount) clips")
+                        // A ternary here would make the whole expression a plain String,
+                        // which Text() does not auto-localize the way a literal does -
+                        // branch instead so each side stays a real literal/concatenation.
+                        Group {
+                            if sourceDurationSeconds == nil {
+                                Text("Reading video…")
+                            } else {
+                                Text("Split into ") + Text("\(expectedCount) ") + Text("clips")
+                            }
+                        }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                             .background(Theme.board)
@@ -162,7 +171,7 @@ struct StorySplitView: View {
 
             HStack(spacing: 6) {
                 Image(systemName: "square.stack.3d.up").font(.caption2).foregroundStyle(Theme.inkSoft)
-                Text("Will produce \(expectedCount) clip\(expectedCount == 1 ? "" : "s"), in order")
+                (Text("Will produce ") + Text("\(expectedCount) ") + Text("clips, in order"))
                     .font(.caption2)
                     .foregroundStyle(Theme.inkSoft)
             }
@@ -184,7 +193,11 @@ struct StorySplitView: View {
 
     private var finishedView: some View {
         VStack(spacing: 14) {
-            Label("\(resultURLs.count) clips saved to Photos", systemImage: "checkmark.circle.fill")
+            Label {
+                Text("\(resultURLs.count) ") + Text("clips saved to Photos")
+            } icon: {
+                Image(systemName: "checkmark.circle.fill")
+            }
                 .foregroundStyle(Theme.accent)
                 .font(.subheadline.weight(.semibold))
 

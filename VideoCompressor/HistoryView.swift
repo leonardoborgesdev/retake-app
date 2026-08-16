@@ -107,7 +107,8 @@ struct HistoryView: View {
     private func summaryStat(value: String, label: String) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.title3.weight(.heavy)).monospacedDigit()
-            Text(label).font(.caption2).foregroundStyle(Theme.inkSoft)
+            // Text(String) doesn't auto-localize the way Text(literal) does.
+            Text(LocalizedStringKey(label)).font(.caption2).foregroundStyle(Theme.inkSoft)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)

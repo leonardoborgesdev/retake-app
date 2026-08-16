@@ -88,7 +88,7 @@ struct AccountView: View {
                             .clipShape(Capsule())
                             .foregroundStyle(Theme.accent)
                     } else {
-                        Text("FREE · \(usageLimiter.remainingToday)/\(UsageLimiter.dailyFreeLimit) LEFT TODAY")
+                        (Text("FREE") + Text(" · \(usageLimiter.remainingToday)/\(UsageLimiter.dailyFreeLimit) ") + Text("LEFT TODAY"))
                             .font(.caption2.weight(.bold))
                             .padding(.horizontal, 10).padding(.vertical, 4)
                             .background(Theme.surface2)
@@ -275,7 +275,11 @@ struct AccountView: View {
     private func stat(value: String, label: String) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.subheadline.weight(.heavy)).monospacedDigit()
-            Text(label).font(.caption2).foregroundStyle(Theme.inkSoft)
+            // label is a String (set from a literal at each call site) - Text(String)
+            // doesn't auto-localize the way Text(literal) does, so wrap it back into
+            // LocalizedStringKey to actually hit Localizable.xcstrings. value is left
+            // as-is since it's already-formatted data (a count or byte size), not prose.
+            Text(LocalizedStringKey(label)).font(.caption2).foregroundStyle(Theme.inkSoft)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)

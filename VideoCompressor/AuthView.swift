@@ -1,4 +1,6 @@
 import SwiftUI
+import AuthenticationServices
+import CryptoKit
 
 struct AuthView: View {
     enum Mode { case logIn, signUp }
@@ -14,6 +16,10 @@ struct AuthView: View {
     @State private var resetEmail = ""
     @State private var isSendingReset = false
     @State private var resetSent = false
+    // Regenerated on every tap of the Apple button (onRequest), read back once Apple
+    // calls onCompletion - GoTrue re-hashes this raw value and checks it against the
+    // nonce claim inside the identity token, to prove the token wasn't replayed.
+    @State private var currentAppleNonce = ""
 
     var body: some View {
         VStack(spacing: 20) {
@@ -74,6 +80,42 @@ struct AuthView: View {
                 .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
             }
             .disabled(isSubmitting)
+
+            HStack(spacing: 10) {
+                Rectangle().fill(Theme.line).frame(height: 1)
+                Text("or").font(.caption2).foregroundStyle(Theme.inkSoft)
+                Rectangle().fill(Theme.line).frame(height: 1)
+            }
+
+            SignInWithAppleButton(.continue) { request in
+                let nonce = Self.randomNonceString()
+                currentAppleNonce = nonce
+                request.requestedScopes = [.fullName, .email]
+                request.nonce = Self.sha256(nonce)
+            } onCompletion: { result in
+                switch result {
+                case .success(let authorization):
+                    guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                          let tokenData = credential.identityToken,
+                          let identityToken = String(data: tokenData, encoding: .utf8) else {
+                        errorMessage = "Could not read the Apple credential."
+                        return
+                    }
+                    Task { await submitAppleSignIn(idToken: identityToken, nonce: currentAppleNonce) }
+                case .failure(let error):
+                    // .canceled fires when the user dismisses the Apple sheet - not a
+                    // real error, don't show an alert for it.
+                    let nsError = error as NSError
+                    if nsError.domain == ASAuthorizationError.errorDomain,
+                       nsError.code == ASAuthorizationError.canceled.rawValue {
+                        return
+                    }
+                    errorMessage = error.localizedDescription
+                }
+            }
+            .signInWithAppleButtonStyle(.black)
+            .frame(height: 46)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
 
             if mode == .logIn {
                 Button {
@@ -221,6 +263,44 @@ struct AuthView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private func submitAppleSignIn(idToken: String, nonce: String) async {
+        isSubmitting = true
+        defer { isSubmitting = false }
+        do {
+            try await accountStore.signInWithApple(idToken: idToken, nonce: nonce)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    // Standard Sign in with Apple nonce recipe: a random raw value is hashed with
+    // SHA256 and sent as the authorization request's nonce; Apple echoes it back inside
+    // the identity token's "nonce" claim. The raw value (not the hash) then goes to
+    // Supabase, which re-hashes it server-side to confirm the token matches this request.
+    private static func randomNonceString(length: Int = 32) -> String {
+        let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+        var result = ""
+        var remaining = length
+        while remaining > 0 {
+            var randoms = [UInt8](repeating: 0, count: 16)
+            let status = SecRandomCopyBytes(kSecRandomDefault, randoms.count, &randoms)
+            precondition(status == errSecSuccess, "Unable to generate nonce.")
+            for random in randoms {
+                guard remaining > 0 else { break }
+                if random < charset.count {
+                    result.append(charset[Int(random)])
+                    remaining -= 1
+                }
+            }
+        }
+        return result
+    }
+
+    private static func sha256(_ input: String) -> String {
+        let hashed = SHA256.hash(data: Data(input.utf8))
+        return hashed.compactMap { String(format: "%02x", $0) }.joined()
     }
 }
 

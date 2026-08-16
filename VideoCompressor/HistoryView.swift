@@ -54,14 +54,7 @@ struct HistoryView: View {
 
     private func row(for entry: HistoryEntry) -> some View {
         HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(LinearGradient(colors: [Theme.surface3, Theme.board], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .frame(width: 36, height: 36)
-                .overlay(
-                    Image(systemName: icon(for: entry.kind))
-                        .font(.caption)
-                        .foregroundStyle(Theme.accent)
-                )
+            HistoryThumbnail(assetIdentifier: entry.resultAssetIdentifier, fallbackIcon: icon(for: entry.kind), size: 44)
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.filename).font(.subheadline.weight(.semibold)).lineLimit(1)
                 Text(entry.date.formatted(date: .abbreviated, time: .shortened))

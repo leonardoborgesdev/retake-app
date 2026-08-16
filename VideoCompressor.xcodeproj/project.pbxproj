@@ -56,6 +56,7 @@
 		D619D30D62BE3F635D9D0B3E /* AssemblyAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6398263456A28C982F6667 /* AssemblyAIClient.swift */; };
 		D7399624C640342C7B1C8D3C /* CutMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54B54CAB9B91B5CAE91E4B15 /* CutMapperTests.swift */; };
 		D748E2CE3F15B8F02EC51B37 /* SilenceDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1080CA56E40BB94CBDBCA47E /* SilenceDetectorTests.swift */; };
+		D9211143E23579C46EE5ECCF /* HistoryThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5140DF4231BF23452C898A /* HistoryThumbnail.swift */; };
 		E27F316DF99D302A5BA240D4 /* SilenceCutPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B006D960F2F644AEE9040068 /* SilenceCutPlanner.swift */; };
 		E4500B24E78A97AD9205D331 /* TranscriptQATests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329399A27CBE1830C01E9079 /* TranscriptQATests.swift */; };
 		F232E0206F01E95E282157BB /* FeatureInfoCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F764296A8C85461323ED0A /* FeatureInfoCard.swift */; };
@@ -107,6 +108,7 @@
 		54B54CAB9B91B5CAE91E4B15 /* CutMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CutMapperTests.swift; sourceTree = "<group>"; };
 		57B3FAAEACFC32992784ECC3 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		5D7B2BBDC1104F9C0FC92F85 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		5F5140DF4231BF23452C898A /* HistoryThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryThumbnail.swift; sourceTree = "<group>"; };
 		5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		631B2151C2B4E1C1F70665E2 /* Secrets.swift.example */ = {isa = PBXFileReference; path = Secrets.swift.example; sourceTree = "<group>"; };
 		683D26D126FBCE4446364F44 /* RetakeCandidate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetakeCandidate.swift; sourceTree = "<group>"; };
@@ -190,6 +192,7 @@
 				E2D05B9ADEDB5E34768ABB14 /* FFmpegLogBuffer.swift */,
 				C8E064C406655C144129016A /* HistoryDetailView.swift */,
 				6D3084A2AA6CA8814428898E /* HistoryStore.swift */,
+				5F5140DF4231BF23452C898A /* HistoryThumbnail.swift */,
 				9A139C9ABBEDA8B328BAD133 /* HistoryView.swift */,
 				5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */,
 				5D7B2BBDC1104F9C0FC92F85 /* NotificationManager.swift */,
@@ -361,6 +364,7 @@
 				F232E0206F01E95E282157BB /* FeatureInfoCard.swift in Sources */,
 				01C194020EB44DD8AAC6ED94 /* HistoryDetailView.swift in Sources */,
 				CEDF7ED120F8F47873840E3A /* HistoryStore.swift in Sources */,
+				D9211143E23579C46EE5ECCF /* HistoryThumbnail.swift in Sources */,
 				9205BFD939C4B7215C9CDB7E /* HistoryView.swift in Sources */,
 				2E996FF9196E49CC53DB2C10 /* HomeView.swift in Sources */,
 				D098532CAF97B6CE4D7142E0 /* NotificationManager.swift in Sources */,
@@ -463,7 +467,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 6;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_LANGUAGE = en;
 				DEVELOPMENT_TEAM = 8KHYA6SXUA;
@@ -581,7 +585,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 6;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_LANGUAGE = en;
 				DEVELOPMENT_TEAM = 8KHYA6SXUA;

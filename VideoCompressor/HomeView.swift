@@ -29,19 +29,6 @@ struct HomeView: View {
                 )
             }
 
-            // Split for Stories: fixed-length sequential clips, no AI - pairs with
-            // Compress/Cut to cover the whole "record -> shrink -> post" chain.
-            NavigationLink {
-                StorySplitView()
-            } label: {
-                FeatureCard(
-                    systemImage: "square.split.2x1",
-                    title: "Split for Stories",
-                    subtitle: "Cut one long take into ordered clips, ready to post.",
-                    badge: "New"
-                )
-            }
-
             // Find Duplicates: retake.'s own users generate exactly this clutter -
             // every Compress run leaves the original behind. Same-length, same-day
             // grouping, on-device, nothing deletes without explicit confirmation.
@@ -52,6 +39,19 @@ struct HomeView: View {
                     systemImage: "square.on.square",
                     title: "Find duplicates",
                     subtitle: "Groups same-length videos from the same day. You choose what to delete.",
+                    badge: "New"
+                )
+            }
+
+            // Split for Stories: fixed-length sequential clips, no AI - pairs with
+            // Compress/Cut to cover the whole "record -> shrink -> post" chain.
+            NavigationLink {
+                StorySplitView()
+            } label: {
+                FeatureCard(
+                    systemImage: "square.split.2x1",
+                    title: "Split for Stories",
+                    subtitle: "Cut one long take into ordered clips, ready to post.",
                     badge: "New"
                 )
             }

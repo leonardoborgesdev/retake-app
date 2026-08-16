@@ -21,7 +21,7 @@ settings:
     INFOPLIST_KEY_NSMicrophoneUsageDescription: "Used to record audio while filming with the built-in teleprompter."
     DEVELOPMENT_LANGUAGE: en
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "4"
+    CURRENT_PROJECT_VERSION: "6"
 packages:
   FFmpegKitSPM:
     url: https://github.com/tylerjonesio/ffmpeg-kit-spm

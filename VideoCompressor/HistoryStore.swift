@@ -19,6 +19,10 @@ struct HistoryEntry: Codable, Identifiable, Equatable {
     let sourceDurationSeconds: Double?
     /// Wall-clock time the compress/cut operation itself took, in seconds.
     let processingSeconds: Double?
+    /// Local identifier of the resulting Photos asset (the first clip's, for Split),
+    /// used to fetch a real thumbnail. Nil for entries recorded before this existed, or
+    /// if the save didn't return one - the UI falls back to a per-kind icon either way.
+    let resultAssetIdentifier: String?
 
     init(
         filename: String,
@@ -27,7 +31,8 @@ struct HistoryEntry: Codable, Identifiable, Equatable {
         originalBytes: Int64? = nil,
         resultBytes: Int64? = nil,
         sourceDurationSeconds: Double? = nil,
-        processingSeconds: Double? = nil
+        processingSeconds: Double? = nil,
+        resultAssetIdentifier: String? = nil
     ) {
         self.id = UUID()
         self.filename = filename
@@ -38,6 +43,7 @@ struct HistoryEntry: Codable, Identifiable, Equatable {
         self.resultBytes = resultBytes
         self.sourceDurationSeconds = sourceDurationSeconds
         self.processingSeconds = processingSeconds
+        self.resultAssetIdentifier = resultAssetIdentifier
     }
 }
 

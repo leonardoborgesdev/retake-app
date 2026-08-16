@@ -31,6 +31,7 @@ struct CompressOnlyView: View {
     // it finishes - no manual "compress" tap per file.
     @State private var showBatchPicker = false
     @State private var batchQueue: [PickedVideo] = []
+    @State private var showBatchReview = false
     @State private var isBatchProcessing = false
     @State private var batchIndex = 0
     @State private var batchResults: [(filename: String, before: Int64, after: Int64)] = []
@@ -44,7 +45,9 @@ struct CompressOnlyView: View {
     var body: some View {
         ScrollView {
         VStack(spacing: 20) {
-            if isBatchProcessing || batchDone {
+            if showBatchReview {
+                batchReviewView
+            } else if isBatchProcessing || batchDone {
                 batchProgressView
             } else if let player {
                 VideoPlayer(player: player)
@@ -157,7 +160,7 @@ struct CompressOnlyView: View {
                 Spacer()
             }
 
-            if !isBatchProcessing && !batchDone {
+            if !showBatchReview && !isBatchProcessing && !batchDone {
                 Button {
                     showPicker = true
                 } label: {
@@ -174,14 +177,8 @@ struct CompressOnlyView: View {
                         Label("Import multiple (batch)", systemImage: "square.stack.3d.up")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 11)
-                            .foregroundStyle(Theme.inkSoft)
+                            .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
                     }
-
-                    Toggle(isOn: $deleteOriginalsAfterBatch) {
-                        Label("Delete originals after batch", systemImage: "trash")
-                            .font(.caption)
-                    }
-                    .tint(Theme.discard)
                 }
             }
         }
@@ -202,7 +199,7 @@ struct CompressOnlyView: View {
             BatchVideoPicker(onPicked: { picked in
                 batchQueue = picked
                 if !picked.isEmpty {
-                    Task { await processBatch() }
+                    showBatchReview = true
                 }
             })
             .ignoresSafeArea()
@@ -225,6 +222,86 @@ struct CompressOnlyView: View {
                 }
             }
 #endif
+        }
+    }
+
+    // Shown after picking a batch of videos, before compressing - mirrors what the
+    // single-video screen shows before its Compress tap (size, quality, delete toggle),
+    // so batch mode isn't a black box that just starts running the moment files are
+    // picked.
+    private var batchReviewView: some View {
+        VStack(spacing: 20) {
+            VStack(spacing: 4) {
+                Text("\(batchQueue.count) video\(batchQueue.count == 1 ? "" : "s") selected")
+                    .font(.headline)
+                let totalSize = batchQueue.reduce(Int64(0)) { $0 + (fileSize(at: $1.url) ?? 0) }
+                Text("Total: \(ByteFormatting.humanReadableSize(totalSize))")
+                    .font(.caption)
+                    .foregroundStyle(Theme.inkSoft)
+            }
+
+            VStack(spacing: 0) {
+                ForEach(Array(batchQueue.enumerated()), id: \.offset) { index, item in
+                    HStack(spacing: 10) {
+                        Text("\(index + 1)")
+                            .font(.caption.monospaced().weight(.bold))
+                            .foregroundStyle(Theme.accent)
+                            .frame(width: 20)
+                        Text(item.url.lastPathComponent)
+                            .font(.caption)
+                            .lineLimit(1)
+                        Spacer()
+                        Text(ByteFormatting.humanReadableSize(fileSize(at: item.url) ?? 0))
+                            .font(.caption.monospaced())
+                            .foregroundStyle(Theme.inkSoft)
+                    }
+                    .padding(.vertical, 6)
+                    if index < batchQueue.count - 1 {
+                        Divider().overlay(Theme.line)
+                    }
+                }
+            }
+            .padding(.horizontal, 14)
+            .background(Theme.surface2)
+            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Quality").font(.caption).foregroundStyle(Theme.inkSoft)
+                Picker("Quality", selection: $tierRawValue) {
+                    ForEach(CompressionTier.allCases) { tier in
+                        Text(tier.label).tag(tier.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
+            Toggle(isOn: $deleteOriginalsAfterBatch) {
+                Label("Delete originals after saving", systemImage: "trash")
+                    .font(.caption)
+            }
+            .tint(Theme.discard)
+
+            Button {
+                showBatchReview = false
+                Task { await processBatch() }
+            } label: {
+                Text("Compress \(batchQueue.count) video\(batchQueue.count == 1 ? "" : "s")")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Theme.board)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+            }
+
+            Button {
+                batchQueue = []
+                showBatchReview = false
+            } label: {
+                Text("Cancel")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 11)
+                    .foregroundStyle(Theme.inkSoft)
+            }
         }
     }
 
@@ -275,13 +352,18 @@ struct CompressOnlyView: View {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.caption)
                                 .foregroundStyle(Theme.accent)
-                            Text(result.filename)
-                                .font(.caption)
-                                .lineLimit(1)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(result.filename)
+                                    .font(.caption)
+                                    .lineLimit(1)
+                                Text("\(ByteFormatting.humanReadableSize(result.before)) → \(ByteFormatting.humanReadableSize(result.after))")
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(Theme.inkSoft)
+                            }
                             Spacer()
                             Text("-\(ByteFormatting.savingsPercentage(originalBytes: result.before, compressedBytes: result.after))%")
                                 .font(.caption.monospaced().weight(.semibold))
-                                .foregroundStyle(Theme.inkSoft)
+                                .foregroundStyle(Theme.accent)
                         }
                         .padding(.vertical, 8)
                         if index < batchResults.count - 1 {
@@ -334,7 +416,7 @@ struct CompressOnlyView: View {
             do {
                 try await compressionService.compress(inputURL: item.url, outputURL: outputURL, tier: tier)
                 let after = fileSize(at: outputURL) ?? 0
-                try await PhotoLibrarySaver.save(videoURL: outputURL)
+                let resultAssetIdentifier = try await PhotoLibrarySaver.save(videoURL: outputURL)
                 if deleteOriginalsAfterBatch, let assetIdentifier = item.assetIdentifier {
                     try? await PhotoLibrarySaver.deleteAsset(identifier: assetIdentifier)
                 }
@@ -347,7 +429,8 @@ struct CompressOnlyView: View {
                     originalBytes: before,
                     resultBytes: after,
                     sourceDurationSeconds: duration,
-                    processingSeconds: elapsed
+                    processingSeconds: elapsed,
+                    resultAssetIdentifier: resultAssetIdentifier
                 ))
                 batchResults.append((filename: item.url.lastPathComponent, before: before, after: after))
             } catch {
@@ -513,7 +596,7 @@ struct CompressOnlyView: View {
         isSaving = true
         defer { isSaving = false }
         do {
-            try await PhotoLibrarySaver.save(videoURL: pendingOutputURL)
+            let assetIdentifier = try await PhotoLibrarySaver.save(videoURL: pendingOutputURL)
             didSave = true
             NotificationManager.notifyJobFinished(
                 title: "Compress finished",
@@ -528,7 +611,8 @@ struct CompressOnlyView: View {
                     originalBytes: originalSizeBytes,
                     resultBytes: compressedSizeBytes,
                     sourceDurationSeconds: sourceDurationSeconds,
-                    processingSeconds: pendingElapsedSeconds
+                    processingSeconds: pendingElapsedSeconds,
+                    resultAssetIdentifier: assetIdentifier
                 ))
             }
             try? FileManager.default.removeItem(at: pendingOutputURL)

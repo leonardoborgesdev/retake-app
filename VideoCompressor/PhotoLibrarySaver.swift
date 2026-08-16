@@ -19,13 +19,20 @@ enum PhotoLibrarySaveError: LocalizedError {
 }
 
 enum PhotoLibrarySaver {
-    static func save(videoURL: URL) async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+    /// Returns the newly-created asset's local identifier, so callers can keep it around
+    /// (e.g. on a History entry) to fetch a real thumbnail later - PHAssetChangeRequest
+    /// hands back a placeholder synchronously inside the change block, before the async
+    /// save actually commits.
+    @discardableResult
+    static func save(videoURL: URL) async throws -> String? {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String?, Error>) in
+            var placeholderIdentifier: String?
             PHPhotoLibrary.shared().performChanges({
-                PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
+                let request = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
+                placeholderIdentifier = request?.placeholderForCreatedAsset?.localIdentifier
             }, completionHandler: { success, error in
                 if success {
-                    continuation.resume()
+                    continuation.resume(returning: placeholderIdentifier)
                 } else {
                     continuation.resume(throwing: PhotoLibrarySaveError.saveFailed(error?.localizedDescription ?? "unknown error"))
                 }

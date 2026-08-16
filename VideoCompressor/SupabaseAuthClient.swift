@@ -111,6 +111,23 @@ enum SupabaseAuthClient {
         return try decodeSession(data)
     }
 
+    /// Exchanges an Apple identity token for a session via GoTrue's id_token grant.
+    /// Requires the Apple provider to be configured in Supabase (Services ID, Team ID,
+    /// Key ID, .p8 key) - until that's done this returns a server error, same as any
+    /// other misconfigured provider.
+    static func signInWithApple(idToken: String, nonce: String) async throws -> SupabaseSession {
+        let url = URL(string: baseURL.absoluteString + "/auth/v1/token?grant_type=id_token")!
+        var request = makeRequest(url: url)
+        request.httpBody = try JSONSerialization.data(withJSONObject: [
+            "provider": "apple",
+            "id_token": idToken,
+            "nonce": nonce,
+        ])
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try checkStatus(response, data: data)
+        return try decodeSession(data)
+    }
+
     static func logIn(email: String, password: String) async throws -> SupabaseSession {
         let url = URL(string: baseURL.absoluteString + "/auth/v1/token?grant_type=password")!
         var request = makeRequest(url: url)

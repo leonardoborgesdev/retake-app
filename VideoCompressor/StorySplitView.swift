@@ -124,6 +124,14 @@ struct StorySplitView: View {
         .onAppear {
             guard player == nil, let initialURL else { return }
             load(url: initialURL)
+#if DEBUG
+            if UserDefaults.standard.bool(forKey: "debugAutoRun") {
+                Task {
+                    try? await Task.sleep(nanoseconds: 1_500_000_000)
+                    await split()
+                }
+            }
+#endif
         }
     }
 
@@ -251,8 +259,10 @@ struct StorySplitView: View {
                 throw StorySplitError.ffmpegFailed("no clips were produced")
             }
 
+            var firstAssetIdentifier: String?
             for clip in clips {
-                try await PhotoLibrarySaver.save(videoURL: clip)
+                let identifier = try await PhotoLibrarySaver.save(videoURL: clip)
+                if firstAssetIdentifier == nil { firstAssetIdentifier = identifier }
                 savedCount += 1
             }
             resultURLs = clips
@@ -268,7 +278,8 @@ struct StorySplitView: View {
                 kind: .split,
                 resultTag: "\(clips.count) clip\(clips.count == 1 ? "" : "s")",
                 sourceDurationSeconds: sourceDurationSeconds,
-                processingSeconds: elapsed
+                processingSeconds: elapsed,
+                resultAssetIdentifier: firstAssetIdentifier
             ))
         } catch {
             errorMessage = error.localizedDescription
@@ -277,6 +288,7 @@ struct StorySplitView: View {
     }
 
     private func runFFmpeg(command: String, totalDuration: Double) async throws {
+        let buffer = FFmpegLogBuffer()
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             FFmpegKit.executeAsync(command, withCompleteCallback: { session in
                 Task { @MainActor in
@@ -288,11 +300,15 @@ struct StorySplitView: View {
                     if ReturnCode.isSuccess(returnCode) {
                         continuation.resume()
                     } else {
-                        let trace = session.getFailStackTrace() ?? "unknown error"
+                        let trace = session.getFailStackTrace() ?? buffer.lastLines(5) ?? "unknown error"
                         continuation.resume(throwing: StorySplitError.ffmpegFailed(trace))
                     }
                 }
-            }, withLogCallback: nil, withStatisticsCallback: { statistics in
+            }, withLogCallback: { log in
+                if let message = log?.getMessage() {
+                    buffer.append(message)
+                }
+            }, withStatisticsCallback: { statistics in
                 guard let statistics, totalDuration > 0 else { return }
                 let processedSeconds = Double(statistics.getTime()) / 1000.0
                 let fraction = min(max(processedSeconds / totalDuration, 0), 1)

@@ -185,7 +185,7 @@ struct CutOnlyView: View {
         isSaving = true
         defer { isSaving = false }
         do {
-            try await PhotoLibrarySaver.save(videoURL: url)
+            let assetIdentifier = try await PhotoLibrarySaver.save(videoURL: url)
             didSave = true
             NotificationManager.notifyJobFinished(
                 title: "Cut silence & retakes finished",
@@ -198,7 +198,8 @@ struct CutOnlyView: View {
                 kind: .cut,
                 resultTag: "\(cutCount) cut\(cutCount == 1 ? "" : "s")",
                 sourceDurationSeconds: sourceDurationSeconds,
-                processingSeconds: elapsed
+                processingSeconds: elapsed,
+                resultAssetIdentifier: assetIdentifier
             ))
             try? FileManager.default.removeItem(at: url)
         } catch {

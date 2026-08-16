@@ -57,6 +57,11 @@ final class AccountStore: ObservableObject {
         applySession(supabaseSession)
     }
 
+    func signInWithApple(idToken: String, nonce: String) async throws {
+        let supabaseSession = try await SupabaseAuthClient.signInWithApple(idToken: idToken, nonce: nonce)
+        applySession(supabaseSession)
+    }
+
     func signOut() {
         session = nil
         UserDefaults.standard.removeObject(forKey: sessionKey)

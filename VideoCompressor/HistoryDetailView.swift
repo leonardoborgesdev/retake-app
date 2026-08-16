@@ -5,14 +5,16 @@ struct HistoryDetailView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            RoundedRectangle(cornerRadius: Theme.cardRadius)
-                .fill(LinearGradient(colors: [Theme.surface3, Theme.board], startPoint: .topLeading, endPoint: .bottomTrailing))
-                .frame(height: 140)
-                .overlay(
-                    Image(systemName: kindIcon)
-                        .font(.system(size: 36))
-                        .foregroundStyle(Theme.accent)
+            GeometryReader { geo in
+                HistoryThumbnail(
+                    assetIdentifier: entry.resultAssetIdentifier,
+                    fallbackIcon: kindIcon,
+                    width: geo.size.width,
+                    height: 180,
+                    cornerRadius: Theme.cardRadius
                 )
+            }
+            .frame(height: 180)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.filename).font(.headline)

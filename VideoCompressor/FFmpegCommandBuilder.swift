@@ -68,7 +68,11 @@ enum FFmpegCommandBuilder {
     /// so cuts land on the nearest keyframe rather than the exact second; fine for this
     /// use case, not frame-accurate like the retake cutter.
     static func segmentArguments(inputPath: String, outputPattern: String, segmentSeconds: Int) -> String {
-        "-y -i \"\(inputPath)\" -c copy -map 0 -f segment -segment_time \(segmentSeconds) -reset_timestamps 1 \"\(outputPattern)\""
+        // Explicit video/audio maps (not "-map 0"): iPhone recordings from Photos carry
+        // extra tracks - a tmcd timecode track, sometimes gyro/motion metadata - that the
+        // mp4 segment muxer refuses to write with -c copy, failing the whole split. The
+        // "?" on the audio map makes it optional so silent source video still works.
+        "-y -i \"\(inputPath)\" -map 0:v:0 -map 0:a:0? -c copy -f segment -segment_time \(segmentSeconds) -reset_timestamps 1 \"\(outputPattern)\""
     }
 
     static func expectedSegmentCount(durationSeconds: Double, segmentSeconds: Int) -> Int {

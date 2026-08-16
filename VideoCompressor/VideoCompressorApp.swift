@@ -18,6 +18,8 @@ struct VideoCompressorApp: App {
             RootView()
                 .environmentObject(AccountStore.shared)
                 .environmentObject(HistoryStore.shared)
+                .environmentObject(SubscriptionStore.shared)
+                .environmentObject(UsageLimiter.shared)
         }
     }
 }

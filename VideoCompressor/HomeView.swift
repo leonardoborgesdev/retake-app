@@ -39,7 +39,7 @@ struct HomeView: View {
                     systemImage: "square.on.square",
                     title: "Find duplicates",
                     subtitle: "Groups same-length videos from the same day. You choose what to delete.",
-                    badge: "New"
+                    badge: "Pro"
                 )
             }
 
@@ -52,7 +52,7 @@ struct HomeView: View {
                     systemImage: "square.split.2x1",
                     title: "Split for Stories",
                     subtitle: "Cut one long take into ordered clips, ready to post.",
-                    badge: "New"
+                    badge: "Pro"
                 )
             }
 

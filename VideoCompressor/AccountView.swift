@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 
 enum AppLanguage: String, CaseIterable, Identifiable {
     case en, pt, es
@@ -34,12 +35,16 @@ enum AppAppearance: String, CaseIterable, Identifiable {
 struct AccountView: View {
     @EnvironmentObject private var accountStore: AccountStore
     @EnvironmentObject private var historyStore: HistoryStore
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var usageLimiter: UsageLimiter
 
     @State private var apiKey: String = APIKeyStore.load() ?? ""
     @State private var savedConfirmation = false
     @State private var showDeleteConfirmation = false
     @State private var isDeletingAccount = false
     @State private var deleteErrorMessage: String?
+    @State private var showPaywall = false
+    @State private var showManageSubscriptions = false
     @AppStorage("compressionTier") private var tierRawValue = CompressionTier.balanced.rawValue
     @AppStorage("appLanguage") private var languageRawValue = AppLanguage.en.rawValue
     @AppStorage("appAppearance") private var appearanceRawValue = AppAppearance.system.rawValue
@@ -63,12 +68,21 @@ struct AccountView: View {
                         }
                     }
 
-                    Text("FREE PLAN")
-                        .font(.caption2.weight(.bold))
-                        .padding(.horizontal, 10).padding(.vertical, 4)
-                        .background(Theme.surface2)
-                        .clipShape(Capsule())
-                        .foregroundStyle(Theme.inkSoft)
+                    if subscriptionStore.isSubscribed {
+                        Text("UNLIMITED")
+                            .font(.caption2.weight(.bold))
+                            .padding(.horizontal, 10).padding(.vertical, 4)
+                            .background(Theme.accentSoft)
+                            .clipShape(Capsule())
+                            .foregroundStyle(Theme.accent)
+                    } else {
+                        Text("FREE · \(usageLimiter.remainingToday)/\(UsageLimiter.dailyFreeLimit) LEFT TODAY")
+                            .font(.caption2.weight(.bold))
+                            .padding(.horizontal, 10).padding(.vertical, 4)
+                            .background(Theme.surface2)
+                            .clipShape(Capsule())
+                            .foregroundStyle(Theme.inkSoft)
+                    }
 
                     HStack(spacing: 10) {
                         stat(value: "\(historyStore.entries.count)", label: "videos edited")
@@ -84,6 +98,27 @@ struct AccountView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
                 .listRowBackground(Color.clear)
+            }
+
+            Section {
+                if subscriptionStore.isSubscribed {
+                    Button("Manage subscription") {
+                        showManageSubscriptions = true
+                    }
+                } else {
+                    Button("Upgrade to Unlimited") {
+                        showPaywall = true
+                    }
+                    Button("Restore purchases") {
+                        Task { try? await subscriptionStore.restore() }
+                    }
+                }
+            } header: {
+                Text("Subscription")
+            } footer: {
+                Text(subscriptionStore.isSubscribed
+                     ? "Unlimited Compress & Cut, plus Find Duplicates and Split for Stories."
+                     : "Compress & Cut are free up to \(UsageLimiter.dailyFreeLimit) videos a day. Find Duplicates and Split for Stories need Unlimited.")
             }
 
             Section {
@@ -185,6 +220,10 @@ struct AccountView: View {
         }, message: {
             Text(deleteErrorMessage ?? "")
         })
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(reason: "Unlock unlimited Compress & Cut, Find Duplicates, and Split for Stories.")
+        }
+        .manageSubscriptionsSheet(isPresented: $showManageSubscriptions)
     }
 
     private func deleteAccount() async {

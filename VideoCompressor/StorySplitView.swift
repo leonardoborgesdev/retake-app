@@ -21,6 +21,8 @@ struct StorySplitView: View {
     var initialURL: URL? = nil
 
     @EnvironmentObject private var historyStore: HistoryStore
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @State private var showPaywall = false
 
     @State private var showPicker = false
     @State private var isImporting = false
@@ -49,7 +51,11 @@ struct StorySplitView: View {
                 } else {
                     segmentPicker
                     Button {
-                        Task { await split() }
+                        if subscriptionStore.isSubscribed {
+                            Task { await split() }
+                        } else {
+                            showPaywall = true
+                        }
                     } label: {
                         Text(sourceDurationSeconds == nil ? "Reading video…" : "Split into \(expectedCount) clips")
                             .frame(maxWidth: .infinity)
@@ -121,6 +127,9 @@ struct StorySplitView: View {
         }, message: {
             Text(errorMessage ?? "")
         })
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(reason: "Split for Stories is part of retake. Unlimited.")
+        }
         .onAppear {
             guard player == nil, let initialURL else { return }
             load(url: initialURL)

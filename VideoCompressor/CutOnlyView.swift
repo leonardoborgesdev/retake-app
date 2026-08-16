@@ -5,6 +5,9 @@ struct CutOnlyView: View {
     var initialURL: URL? = nil
 
     @EnvironmentObject private var historyStore: HistoryStore
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var usageLimiter: UsageLimiter
+    @State private var showPaywall = false
 
     @State private var showPicker = false
     @State private var isImporting = false
@@ -46,6 +49,11 @@ struct CutOnlyView: View {
                             .background(Theme.board)
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                    }
+                    if !subscriptionStore.isSubscribed {
+                        Text("\(usageLimiter.remainingToday) of \(UsageLimiter.dailyFreeLimit) free videos left today")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.inkSoft)
                     }
                 }
             } else if isImporting {
@@ -125,6 +133,9 @@ struct CutOnlyView: View {
         }, message: {
             Text(errorMessage ?? "")
         })
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
         .onAppear {
             guard player == nil, let initialURL else { return }
             importedVideoURL = initialURL
@@ -163,6 +174,10 @@ struct CutOnlyView: View {
 
     private func runEditingPipeline() async {
         guard let importedVideoURL else { return }
+        guard subscriptionStore.isSubscribed || usageLimiter.canUse() else {
+            showPaywall = true
+            return
+        }
         pipelineStartedAt = Date()
         NotificationManager.requestAuthorizationIfNeeded()
         if let result = await editingPipeline.run(sourceURL: importedVideoURL) {
@@ -187,6 +202,7 @@ struct CutOnlyView: View {
         do {
             let assetIdentifier = try await PhotoLibrarySaver.save(videoURL: url)
             didSave = true
+            if !subscriptionStore.isSubscribed { usageLimiter.recordUsage() }
             NotificationManager.notifyJobFinished(
                 title: "Cut silence & retakes finished",
                 body: "\(sourceName) is ready in Photos."

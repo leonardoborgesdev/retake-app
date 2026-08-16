@@ -6,6 +6,10 @@ struct CompressOnlyView: View {
     var initialURL: URL? = nil
 
     @EnvironmentObject private var historyStore: HistoryStore
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var usageLimiter: UsageLimiter
+    @State private var showPaywall = false
+    @State private var paywallReason = "You've used all 10 free videos today."
 
     @State private var showPicker = false
     @State private var isImporting = false
@@ -121,6 +125,12 @@ struct CompressOnlyView: View {
                             .foregroundStyle(.white)
                             .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
+
+                    if !subscriptionStore.isSubscribed {
+                        Text("\(usageLimiter.remainingToday) of \(UsageLimiter.dailyFreeLimit) free videos left today")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.inkSoft)
+                    }
                 }
             } else if isImporting {
                 VStack(spacing: 14) {
@@ -209,6 +219,9 @@ struct CompressOnlyView: View {
         }, message: {
             Text(errorMessage ?? "")
         })
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(reason: paywallReason)
+        }
         .onAppear {
             guard player == nil, let initialURL else { return }
             load(url: initialURL)
@@ -397,6 +410,11 @@ struct CompressOnlyView: View {
     }
 
     private func processBatch() async {
+        guard subscriptionStore.isSubscribed || usageLimiter.canUse(count: batchQueue.count) else {
+            paywallReason = "This batch needs \(batchQueue.count) of your free videos today, but only \(usageLimiter.remainingToday) are left."
+            showPaywall = true
+            return
+        }
         isBatchProcessing = true
         batchResults = []
         defer { isBatchProcessing = false; batchDone = true }
@@ -433,6 +451,7 @@ struct CompressOnlyView: View {
                     resultAssetIdentifier: resultAssetIdentifier
                 ))
                 batchResults.append((filename: item.url.lastPathComponent, before: before, after: after))
+                if !subscriptionStore.isSubscribed { usageLimiter.recordUsage() }
             } catch {
                 // Skip this file, keep processing the rest of the queue instead of
                 // aborting the whole batch over one bad file.
@@ -566,6 +585,11 @@ struct CompressOnlyView: View {
 
     private func compress() async {
         guard let importedVideoURL else { return }
+        guard subscriptionStore.isSubscribed || usageLimiter.canUse() else {
+            paywallReason = "You've used all 10 free videos today."
+            showPaywall = true
+            return
+        }
         isCompressing = true
         defer { isCompressing = false }
         NotificationManager.requestAuthorizationIfNeeded()
@@ -598,6 +622,7 @@ struct CompressOnlyView: View {
         do {
             let assetIdentifier = try await PhotoLibrarySaver.save(videoURL: pendingOutputURL)
             didSave = true
+            if !subscriptionStore.isSubscribed { usageLimiter.recordUsage() }
             NotificationManager.notifyJobFinished(
                 title: "Compress finished",
                 body: "\(importedVideoURL.lastPathComponent) is ready in Photos."

@@ -12,6 +12,8 @@ private struct DuplicateGroup: Identifiable {
 }
 
 struct DuplicateFinderView: View {
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @State private var showPaywall = false
     @State private var isScanning = false
     @State private var hasScanned = false
     @State private var groups: [DuplicateGroup] = []
@@ -49,14 +51,23 @@ struct DuplicateFinderView: View {
                         .init(icon: "lock.shield", label: "Privacy", value: "Scan happens entirely on-device"),
                     ])
                     Button {
-                        Task { await scan() }
+                        if subscriptionStore.isSubscribed {
+                            Task { await scan() }
+                        } else {
+                            showPaywall = true
+                        }
                     } label: {
-                        Text("Scan library")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Theme.board)
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        HStack(spacing: 6) {
+                            if !subscriptionStore.isSubscribed {
+                                Image(systemName: "lock.fill")
+                            }
+                            Text(subscriptionStore.isSubscribed ? "Scan library" : "Scan library (Unlimited)")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Theme.board)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                 }
                 .padding()
@@ -91,6 +102,9 @@ struct DuplicateFinderView: View {
         }, message: {
             Text(errorMessage ?? "")
         })
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(reason: "Find Duplicates is part of retake. Unlimited.")
+        }
     }
 
     private var resultsList: some View {

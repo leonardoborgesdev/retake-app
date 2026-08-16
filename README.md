@@ -1,5 +1,7 @@
 # retake.
 
+[![License: MIT](https://img.shields.io/github/license/leonardoborgesdev/retake-app)](LICENSE) [![Top language](https://img.shields.io/github/languages/top/leonardoborgesdev/retake-app)](#)
+
 **On-device video compression with AI-powered retake detection.**
 
 ## Why this exists

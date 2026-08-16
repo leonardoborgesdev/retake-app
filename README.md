@@ -8,17 +8,18 @@ Filming yourself on an iPhone means you almost always stumble a line, say it twi
 
 ## Features
 
-- **On-device video compression** — re-encodes to H.265/HEVC using the iPhone's hardware encoder (`hevc_videotoolbox`), with real-time VideoToolbox mode for faster exports. No upload, no server, no account required. Batch/queue mode compresses several videos in a row.
-- **Cut silence & retakes** — transcribes the audio, finds dead air and repeated lines, and surfaces a review screen where you pick which take to keep. The app's real differentiator: this kind of retake-aware editing otherwise only exists in desktop plugins or web SaaS.
-- **Find Duplicates** — groups same-length videos recorded the same day (the copies Compress tends to leave behind) and lets you clean them up, on-device.
-- **Split for Stories** — cuts one long recording into ordered, fixed-length clips ready to post.
-- **Record with teleprompter** *(bonus, not linked from Home)* — native camera capture with an auto-scrolling script overlay, chained straight into Compress or Cut.
+- **On-device video compression** — re-encodes to H.265/HEVC using the iPhone's hardware encoder (`hevc_videotoolbox`), with real-time VideoToolbox mode for faster exports. No upload, no server. Batch mode compresses a whole queue back to back, and shows the estimated size/savings before you commit.
+- **Cut silence & retakes** — transcribes the audio, finds silence gaps and repeated phrases, and surfaces a review screen where you pick which take to keep. The app's real differentiator: this kind of retake-aware editing otherwise only exists in desktop plugins or web SaaS, not on iPhone.
+- **Split for Stories** — slices one long recording into ordered, fixed-length clips (10–60s) using ffmpeg's segment muxer, no re-encode. Ready-made Stories/Reels posting queue.
+- **Find Duplicates** — scans the Photos library for videos with matching length and creation day (the copies Compress and re-imports tend to leave behind), groups them, suggests a keeper, deletes only what you confirm. Public-API-only, entirely on-device.
+- **Record with teleprompter** *(bonus, not linked from Home yet)* — native camera capture with an auto-scrolling script overlay, chained into Compress/Cut.
 - **Free tier + subscription** — Compress and Cut are free up to 10 videos/day; Find Duplicates and Split for Stories, plus the daily cap, are unlocked by retake. Unlimited ($3.99/mo). All four tools stay usable up to the point of real value (scanning, splitting) before any paywall appears.
 - **Native iOS 26 Liquid Glass** — real `.glassEffect()` material (not a recreation) throughout the app on iOS 26+: cards, primary/secondary/destructive buttons, and floating controls like Record's live REC badge. Falls back to the original solid design on iOS 16–25, unchanged.
-- **English + Portuguese (BR) localization**, switchable in-app without restarting.
-- **Sign in with Apple**, plus email/password auth against Supabase.
-- **Delete original from Photos** (opt-in) — reclaim storage after compressing, without losing the source unless you choose to.
-- **Local run history** — every job is logged on-device the moment it starts (so an interrupted job shows up as "Interrupted" instead of silently vanishing), with a Photos thumbnail once it's done.
+- **English + Portuguese (BR) localization**, switchable in-app without restarting, plus a light/dark appearance toggle and selectable default compression quality.
+- **Real Supabase-backed auth** — Sign in with Apple or email/password, accounts are real, not just local Keychain state. Account deletion is in-app and self-service (Apple 5.1.1(v) compliant), with a working forgot-password flow.
+- **Delete original from Photos** (opt-in, before or after compressing) — reclaim storage without losing the source unless you choose to.
+- **Local notifications** — get told when a compress/cut/split/batch job finishes instead of watching a progress bar.
+- **Local run history** — every job is logged on-device the moment it starts (so an interrupted job shows up as "Interrupted" instead of silently vanishing), with a Photos thumbnail, before/after size, and processing time once it's done.
 
 ## Tech stack
 

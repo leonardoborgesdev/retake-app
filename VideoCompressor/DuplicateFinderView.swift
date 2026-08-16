@@ -59,9 +59,7 @@ struct DuplicateFinderView: View {
                         Text("Scan library")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Theme.board)
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                            .primaryButtonSurface()
                     }
                 }
                 .padding()

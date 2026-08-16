@@ -26,6 +26,26 @@ enum Theme {
     static var mono: Font { .system(.footnote, design: .monospaced) }
 }
 
+extension View {
+    /// The app's primary filled-button treatment: Apple's native Liquid Glass material
+    /// on iOS 26+ (the real system effect, not a recreation), the existing solid
+    /// Theme.board fill on earlier versions. Glass owns its own foreground/shape
+    /// together rather than composing with separate .background/.clipShape calls.
+    @ViewBuilder
+    func primaryButtonSurface(cornerRadius: CGFloat = Theme.controlRadius) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .foregroundStyle(.white)
+                .glassEffect(.regular.tint(Theme.accent).interactive(), in: RoundedRectangle(cornerRadius: cornerRadius))
+        } else {
+            self
+                .background(Theme.board)
+                .foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        }
+    }
+}
+
 extension Color {
     init(hex: UInt32, opacity: Double = 1) {
         let r = Double((hex >> 16) & 0xFF) / 255

@@ -47,9 +47,7 @@ struct CutOnlyView: View {
                         Text("Cut silence & retakes")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Theme.board)
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                            .primaryButtonSurface()
                     }
                     if !subscriptionStore.isSubscribed {
                         (Text("\(usageLimiter.remainingToday) ") + Text("of") + Text(" \(UsageLimiter.dailyFreeLimit) ") + Text("free videos left today"))

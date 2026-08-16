@@ -93,9 +93,7 @@ struct PaywallView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Theme.board)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                    .primaryButtonSurface()
                 }
                 .disabled(subscriptionStore.isPurchasing)
 

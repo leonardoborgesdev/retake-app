@@ -88,9 +88,7 @@ struct AuthView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Theme.board)
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                .primaryButtonSurface()
             }
             .disabled(isSubmitting)
 
@@ -166,9 +164,7 @@ struct AuthView: View {
                     Text("Done")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.board)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .primaryButtonSurface()
                 }
             } else {
                 Text("Reset password").font(Theme.displayFont(18))
@@ -188,9 +184,7 @@ struct AuthView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(Theme.board)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                    .primaryButtonSurface()
                 }
                 .disabled(isSendingReset || resetEmail.isEmpty)
             }
@@ -235,9 +229,7 @@ struct AuthView: View {
                 Text("Back to log in")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(Theme.board)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                    .primaryButtonSurface()
             }
         }
     }

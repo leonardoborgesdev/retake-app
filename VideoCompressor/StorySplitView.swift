@@ -74,9 +74,7 @@ struct StorySplitView: View {
                         }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Theme.board)
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                            .primaryButtonSurface()
                     }
                     .disabled(sourceDurationSeconds == nil)
                 }
@@ -257,9 +255,7 @@ struct StorySplitView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.board)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .primaryButtonSurface()
                     }
                 }
                 .disabled(isSavingClips)

@@ -108,8 +108,7 @@ private struct FeatureCard: View {
             Image(systemName: "chevron.right").foregroundStyle(Theme.inkSoft)
         }
         .padding()
-        .background(Theme.surface2)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+        .cardGlassSurface()
         .foregroundStyle(Theme.ink)
     }
 }

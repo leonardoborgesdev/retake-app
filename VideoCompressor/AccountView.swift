@@ -88,9 +88,8 @@ struct AccountView: View {
                         (Text("FREE") + Text(" · \(usageLimiter.remainingToday)/\(UsageLimiter.dailyFreeLimit) ") + Text("LEFT TODAY"))
                             .font(.caption2.weight(.bold))
                             .padding(.horizontal, 10).padding(.vertical, 4)
-                            .background(Theme.surface2)
-                            .clipShape(Capsule())
                             .foregroundStyle(Theme.inkSoft)
+                            .floatingGlassSurface(in: Capsule(), fallbackFill: Theme.surface2)
                     }
 
                     HStack(spacing: 10) {
@@ -278,8 +277,7 @@ struct AccountView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
-        .background(Theme.surface2)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .cardGlassSurface(cornerRadius: 12)
     }
 }
 

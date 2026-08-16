@@ -52,9 +52,7 @@ struct HistoryDetailView: View {
                     Text(actionLabel)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.board)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .primaryButtonSurface()
                 }
             }
             .padding()

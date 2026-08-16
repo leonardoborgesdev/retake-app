@@ -118,7 +118,7 @@ struct StorySplitView: View {
                     Label("Import video", systemImage: "photo.on.rectangle")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 11)
-                        .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                        .outlinedButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                 }
             }
         }
@@ -233,8 +233,7 @@ struct StorySplitView: View {
                 }
             }
             .padding(.horizontal, 14)
-            .background(Theme.surface2)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            .cardGlassSurface()
 
             if !savedToPhotos {
                 Button {
@@ -244,8 +243,7 @@ struct StorySplitView: View {
                         ProgressView().tint(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Theme.board)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                            .primaryButtonSurface()
                     } else {
                         HStack(spacing: 6) {
                             if !subscriptionStore.isSubscribed {
@@ -267,7 +265,7 @@ struct StorySplitView: View {
                 Text("Split another video")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 11)
-                    .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                    .outlinedButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
             }
         }
     }

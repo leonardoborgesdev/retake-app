@@ -99,7 +99,7 @@ struct CutOnlyView: View {
                 Label("Import video", systemImage: "photo.on.rectangle")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 11)
-                    .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                    .outlinedButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
             }
         }
         .padding()

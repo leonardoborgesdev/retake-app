@@ -40,9 +40,11 @@ struct RecordView: View {
                         Button {
                             forceClose()
                         } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.title3)
-                                .foregroundStyle(.white, .black.opacity(0.4))
+                            Image(systemName: "xmark")
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 30, height: 30)
+                                .floatingGlassSurface(in: Circle())
                         }
                     }
                     Spacer()
@@ -111,9 +113,8 @@ struct RecordView: View {
         Text(stage == .recording ? (recorder.isPaused ? "PAUSED" : "REC") + " · \(formatted(elapsed)) " : "")
             .font(.caption2.monospaced().weight(.bold))
             .padding(.horizontal, 10).padding(.vertical, 5)
-            .background(.black.opacity(0.55))
             .foregroundStyle(recorder.isPaused ? .white : Theme.discard)
-            .clipShape(Capsule())
+            .floatingGlassSurface(in: Capsule())
             .opacity(stage == .recording ? 1 : 0)
     }
 
@@ -126,9 +127,7 @@ struct RecordView: View {
                     Text(recorder.isPaused ? "Resume" : "Pause")
                         .font(.caption.weight(.bold))
                         .padding(.horizontal, 16).padding(.vertical, 9)
-                        .background(Theme.accent)
-                        .foregroundStyle(Theme.accentInk)
-                        .clipShape(Capsule())
+                        .accentButtonSurface(in: Capsule())
                 }
             }
             Button {
@@ -137,9 +136,7 @@ struct RecordView: View {
                 Text("Stop")
                     .font(.caption.weight(.bold))
                     .padding(.horizontal, 16).padding(.vertical, 9)
-                    .background(Theme.discard)
-                    .foregroundStyle(.white)
-                    .clipShape(Capsule())
+                    .destructiveButtonSurface(in: Capsule())
             }
         }
         .frame(maxWidth: .infinity)
@@ -181,9 +178,7 @@ struct RecordView: View {
                     Text("Allow camera & microphone")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.board)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .primaryButtonSurface()
                 }
             } else {
                 Button {
@@ -192,9 +187,7 @@ struct RecordView: View {
                     Text("Start recording")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.accent)
-                        .foregroundStyle(Theme.accentInk)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .accentButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                 }
             }
         }
@@ -208,7 +201,7 @@ struct RecordView: View {
                 Text("Record again")
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 11)
-                    .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                    .outlinedButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
             }
             HStack(spacing: 10) {
                 Button {
@@ -217,9 +210,7 @@ struct RecordView: View {
                     Text("Compress")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.board)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .primaryButtonSurface()
                 }
                 Button {
                     goToCut = true
@@ -227,9 +218,7 @@ struct RecordView: View {
                     Text("Cut silence")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.accent)
-                        .foregroundStyle(Theme.accentInk)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .accentButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                 }
             }
         }
@@ -321,9 +310,7 @@ private struct Teleprompter: View {
             .frame(width: geo.size.width, height: geo.size.height * 0.5, alignment: .top)
             .clipped()
             .padding(10)
-            .background(.black.opacity(0.45))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(.white.opacity(0.2)))
+            .floatingGlassSurface(in: RoundedRectangle(cornerRadius: 16), fallbackFill: .black.opacity(0.45))
         }
         .frame(height: 220)
         .onAppear { offset = 0; startTimer() }

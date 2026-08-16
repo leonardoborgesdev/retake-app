@@ -39,7 +39,6 @@ struct FeatureInfoCard: View {
             }
         }
         .padding(.horizontal, 14)
-        .background(Theme.surface2)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+        .cardGlassSurface()
     }
 }

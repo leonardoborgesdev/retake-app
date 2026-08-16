@@ -69,8 +69,7 @@ struct ProcessingView: View {
             }
         }
         .padding(16)
-        .background(Theme.surface2)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+        .cardGlassSurface()
         .onAppear { startSpin() }
     }
 

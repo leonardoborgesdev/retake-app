@@ -112,8 +112,7 @@ struct HistoryView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
-        .background(Theme.surface2)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .cardGlassSurface(cornerRadius: 12)
     }
 }
 

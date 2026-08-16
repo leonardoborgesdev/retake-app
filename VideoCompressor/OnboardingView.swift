@@ -58,9 +58,7 @@ struct OnboardingView: View {
                     Text(page < pageCount - 1 ? "Continue" : "Get started")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Theme.paper)
-                        .foregroundStyle(Theme.ink)
-                        .clipShape(Capsule())
+                        .lightButtonSurface(in: Capsule())
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 20)
@@ -106,12 +104,10 @@ private struct OnboardingPage<Demo: View>: View {
                 .foregroundStyle(.white)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(Color.white.opacity(0.12))
-                .clipShape(Capsule())
+                .floatingGlassSurface(in: Capsule(), fallbackFill: Color.white.opacity(0.12))
             }
             .padding(20)
-            .background(Color.white.opacity(0.06))
-            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            .cardGlassSurface(fallbackFill: Color.white.opacity(0.06))
             .padding(.horizontal, 20)
 
             Spacer(minLength: 0)

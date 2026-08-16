@@ -77,7 +77,7 @@ struct CompressOnlyView: View {
                         Text("Compress another")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 11)
-                            .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                            .outlinedButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                 } else if let compressedSizeBytes, let originalSizeBytes {
                     // Encoded but not saved yet - the user confirms before it touches Photos.
@@ -91,9 +91,7 @@ struct CompressOnlyView: View {
                             Text("Save to Photos")
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
-                                .background(Theme.board)
-                                .foregroundStyle(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                                .primaryButtonSurface()
                         }
                     }
                 } else {
@@ -178,7 +176,7 @@ struct CompressOnlyView: View {
                     Label("Import video", systemImage: "photo.on.rectangle")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 11)
-                        .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                        .outlinedButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                 }
 
                 if player == nil {
@@ -188,7 +186,7 @@ struct CompressOnlyView: View {
                         Label("Import multiple (batch)", systemImage: "square.stack.3d.up")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 11)
-                            .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                            .outlinedButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                 }
             }
@@ -276,8 +274,7 @@ struct CompressOnlyView: View {
                 }
             }
             .padding(.horizontal, 14)
-            .background(Theme.surface2)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            .cardGlassSurface()
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Quality").font(.caption).foregroundStyle(Theme.inkSoft)
@@ -302,9 +299,7 @@ struct CompressOnlyView: View {
                 (Text("Compress") + Text(" \(batchQueue.count) ") + Text("videos"))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(Theme.board)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                    .primaryButtonSurface()
             }
 
             Button {
@@ -404,8 +399,7 @@ struct CompressOnlyView: View {
                     }
                 }
                 .padding(.horizontal, 14)
-                .background(Theme.surface2)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+                .cardGlassSurface()
             }
 
             Spacer()
@@ -420,9 +414,7 @@ struct CompressOnlyView: View {
                     Text("Done")
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.board)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .primaryButtonSurface()
                 }
             }
         }
@@ -538,8 +530,7 @@ struct CompressOnlyView: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity)
-            .background(Theme.surface2)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            .cardGlassSurface()
 
             Text(savings >= 0 ? "-\(savings)% size" : "+\(-savings)% size, higher quality")
                 .font(.caption)
@@ -802,8 +793,7 @@ private struct CompressProgressView: View {
             }
         }
         .padding(16)
-        .background(Theme.surface2)
-        .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+        .cardGlassSurface()
     }
 
     private static func formatDuration(_ seconds: Double) -> String {

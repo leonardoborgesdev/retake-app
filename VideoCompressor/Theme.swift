@@ -44,6 +44,99 @@ extension View {
                 .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         }
     }
+
+    /// A second filled-CTA tone (e.g. "Start recording", "Cut silence") that already
+    /// used Theme.accent + accentInk text pre-glass - kept as its own modifier rather
+    /// than folded into primaryButtonSurface since the foreground stays accentInk
+    /// (reads better on the lighter accent tint) instead of white.
+    @ViewBuilder
+    func accentButtonSurface<S: Shape>(in shape: S) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .foregroundStyle(Theme.accentInk)
+                .glassEffect(.regular.tint(Theme.accent).interactive(), in: shape)
+        } else {
+            self
+                .background(Theme.accent)
+                .foregroundStyle(Theme.accentInk)
+                .clipShape(shape)
+        }
+    }
+
+    /// Destructive filled control (Stop recording, Delete selected/duplicates).
+    @ViewBuilder
+    func destructiveButtonSurface<S: Shape>(in shape: S) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .foregroundStyle(.white)
+                .glassEffect(.regular.tint(Theme.discard).interactive(), in: shape)
+        } else {
+            self
+                .background(Theme.discard)
+                .foregroundStyle(.white)
+                .clipShape(shape)
+        }
+    }
+
+    /// Outlined secondary button (Record again, Compress another, Split another video).
+    /// Glass replaces the hairline stroke on iOS 26+ since the material already carries
+    /// its own edge highlight - a stroke drawn on top of it would double up.
+    @ViewBuilder
+    func outlinedButtonSurface<S: Shape>(in shape: S) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular.interactive(), in: shape)
+        } else {
+            self.overlay(shape.stroke(Theme.line))
+        }
+    }
+
+    /// A light/paper-toned filled pill, used where the surrounding view is already dark
+    /// (e.g. onboarding's "Continue"/"Get started" button over Theme.board).
+    @ViewBuilder
+    func lightButtonSurface<S: Shape>(in shape: S) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+                .foregroundStyle(Theme.ink)
+                .glassEffect(.regular.interactive(), in: shape)
+        } else {
+            self
+                .background(Theme.paper)
+                .foregroundStyle(Theme.ink)
+                .clipShape(shape)
+        }
+    }
+
+    /// Elevated card container (feature rows, info cards, batch/result lists, stat
+    /// tiles) - untinted glass on iOS 26+ so it reads as floating over the page rather
+    /// than another flat fill stacked on Theme.paper.
+    @ViewBuilder
+    func cardGlassSurface(cornerRadius: CGFloat = Theme.cardRadius, fallbackFill: Color = Theme.surface2) -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: cornerRadius))
+        } else {
+            self
+                .background(fallbackFill)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+        }
+    }
+
+    /// Small chip/icon control that floats directly over dynamic content (camera
+    /// preview, video playback) rather than over the app's own flat background - e.g.
+    /// Record's REC status badge and the free-tier usage badge on Account.
+    @ViewBuilder
+    func floatingGlassSurface<S: Shape>(in shape: S, tint: Color? = nil, fallbackFill: Color = .black.opacity(0.55)) -> some View {
+        if #available(iOS 26.0, *) {
+            if let tint {
+                self.glassEffect(.regular.tint(tint).interactive(), in: shape)
+            } else {
+                self.glassEffect(.regular.interactive(), in: shape)
+            }
+        } else {
+            self
+                .background(fallbackFill)
+                .clipShape(shape)
+        }
+    }
 }
 
 extension Color {

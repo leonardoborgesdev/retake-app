@@ -22,9 +22,11 @@ struct PaywallView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 22))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(Theme.inkSoft)
+                        .frame(width: 28, height: 28)
+                        .floatingGlassSurface(in: Circle(), fallbackFill: Theme.surface2)
                 }
             }
             .padding(.top, 4)
@@ -63,8 +65,7 @@ struct PaywallView: View {
                 )
             }
             .padding(.vertical, 6)
-            .background(Theme.surface2)
-            .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            .cardGlassSurface()
             .padding(.top, 20)
 
             Spacer(minLength: 20)

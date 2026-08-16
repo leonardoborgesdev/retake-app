@@ -77,7 +77,7 @@ struct DuplicateFinderView: View {
                         Text("Scan again")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 11)
-                            .overlay(RoundedRectangle(cornerRadius: Theme.controlRadius).stroke(Theme.line))
+                            .outlinedButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                     .padding(.horizontal, 40)
                 }
@@ -132,8 +132,7 @@ struct DuplicateFinderView: View {
                         ProgressView().tint(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(Theme.discard)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                            .destructiveButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                     } else {
                         HStack(spacing: 6) {
                             if !subscriptionStore.isSubscribed {
@@ -143,9 +142,7 @@ struct DuplicateFinderView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
-                        .background(Theme.discard)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        .destructiveButtonSurface(in: RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                 }
                 .disabled(selectedIdentifiers.isEmpty || isDeleting)

@@ -87,16 +87,21 @@ private struct FeatureCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(title).font(.headline)
+                // Text(String) doesn't auto-localize the way Text(literal) does - title/
+                // subtitle/badge are String (set from literals at each call site), so
+                // this wraps them back into LocalizedStringKey to actually hit
+                // Localizable.xcstrings instead of always showing the English source.
+                Text(LocalizedStringKey(title)).font(.headline)
                 if let badge {
-                    Text(badge.uppercased())
+                    Text(LocalizedStringKey(badge))
+                        .textCase(.uppercase)
                         .font(.caption2.weight(.bold))
                         .padding(.horizontal, 6).padding(.vertical, 2)
                         .background(Theme.accentSoft)
                         .foregroundStyle(Theme.accent)
                         .clipShape(Capsule())
                 }
-                Text(subtitle).font(.subheadline).foregroundStyle(Theme.inkSoft)
+                Text(LocalizedStringKey(subtitle)).font(.subheadline).foregroundStyle(Theme.inkSoft)
             }
 
             Spacer()

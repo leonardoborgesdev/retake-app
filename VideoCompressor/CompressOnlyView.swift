@@ -10,6 +10,7 @@ struct CompressOnlyView: View {
     @EnvironmentObject private var usageLimiter: UsageLimiter
     @State private var showPaywall = false
     @State private var paywallReason = "You've used all 10 free videos today."
+    @State private var pendingHistoryID: UUID?
 
     @State private var showPicker = false
     @State private var isImporting = false
@@ -594,6 +595,15 @@ struct CompressOnlyView: View {
         defer { isCompressing = false }
         NotificationManager.requestAuthorizationIfNeeded()
 
+        // Recorded before any real work happens - if the app gets killed mid-job (e.g.
+        // backgrounded through a very long encode) this shows up as "Interrupted" in
+        // History next launch instead of just vanishing.
+        pendingHistoryID = historyStore.recordPending(
+            filename: importedVideoURL.lastPathComponent,
+            kind: .compress,
+            sourceDurationSeconds: sourceDurationSeconds
+        )
+
         // Best-effort: ask iOS for extra time so compression keeps going if the user
         // backgrounds the app mid-encode, instead of being suspended immediately.
         let backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "compress-video")
@@ -612,6 +622,10 @@ struct CompressOnlyView: View {
         } catch {
             errorMessage = error.localizedDescription
             try? FileManager.default.removeItem(at: outputURL)
+            if let pendingHistoryID {
+                historyStore.discardPending(id: pendingHistoryID)
+                self.pendingHistoryID = nil
+            }
         }
     }
 
@@ -627,18 +641,17 @@ struct CompressOnlyView: View {
                 title: "Compress finished",
                 body: "\(importedVideoURL.lastPathComponent) is ready in Photos."
             )
-            if let originalSizeBytes, let compressedSizeBytes {
+            if let originalSizeBytes, let compressedSizeBytes, let pendingHistoryID {
                 let savings = ByteFormatting.savingsPercentage(originalBytes: originalSizeBytes, compressedBytes: compressedSizeBytes)
-                historyStore.record(HistoryEntry(
-                    filename: importedVideoURL.lastPathComponent,
-                    kind: .compress,
+                historyStore.markCompleted(
+                    id: pendingHistoryID,
                     resultTag: "-\(savings)%",
                     originalBytes: originalSizeBytes,
                     resultBytes: compressedSizeBytes,
-                    sourceDurationSeconds: sourceDurationSeconds,
                     processingSeconds: pendingElapsedSeconds,
                     resultAssetIdentifier: assetIdentifier
-                ))
+                )
+                self.pendingHistoryID = nil
             }
             try? FileManager.default.removeItem(at: pendingOutputURL)
             self.pendingOutputURL = nil
@@ -649,12 +662,20 @@ struct CompressOnlyView: View {
             }
         } catch {
             errorMessage = error.localizedDescription
+            if let pendingHistoryID {
+                historyStore.discardPending(id: pendingHistoryID)
+                self.pendingHistoryID = nil
+            }
         }
     }
 
     private func resetState() {
         if let pendingOutputURL {
             try? FileManager.default.removeItem(at: pendingOutputURL)
+        }
+        if let pendingHistoryID {
+            historyStore.discardPending(id: pendingHistoryID)
+            self.pendingHistoryID = nil
         }
         importedVideoURL = nil
         importedAssetIdentifier = nil
@@ -726,7 +747,8 @@ private struct CompressProgressView: View {
                             }
                         }
                         .frame(width: 18, height: 18)
-                        Text(step.title)
+                        // Text(String) doesn't auto-localize the way Text(literal) does.
+                        Text(LocalizedStringKey(step.title))
                             .font(.caption)
                             .foregroundStyle(isDone || isActive ? Theme.ink : Theme.inkSoft)
                             .fontWeight(isDone || isActive ? .semibold : .regular)

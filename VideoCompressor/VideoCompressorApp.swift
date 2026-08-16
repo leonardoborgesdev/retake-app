@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct VideoCompressorApp: App {
     init() {
+        NotificationManager.configure()
 #if DEBUG
         // Debug-only: `defaults write <bundle-id> debugAssemblyAIKey -string "<key>"`
         // seeds the Keychain on launch so simulator/CI testing doesn't need to type a

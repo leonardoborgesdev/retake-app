@@ -23,6 +23,7 @@ struct StorySplitView: View {
     @EnvironmentObject private var historyStore: HistoryStore
     @EnvironmentObject private var subscriptionStore: SubscriptionStore
     @State private var showPaywall = false
+    @State private var pendingHistoryID: UUID?
 
     @State private var showPicker = false
     @State private var isImporting = false
@@ -247,6 +248,12 @@ struct StorySplitView: View {
         defer { isSplitting = false }
         NotificationManager.requestAuthorizationIfNeeded()
 
+        pendingHistoryID = historyStore.recordPending(
+            filename: importedVideoURL.lastPathComponent,
+            kind: .split,
+            sourceDurationSeconds: sourceDurationSeconds
+        )
+
         let outputDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("split-\(UUID().uuidString)")
         try? FileManager.default.createDirectory(at: outputDir, withIntermediateDirectories: true)
@@ -282,16 +289,21 @@ struct StorySplitView: View {
             )
 
             let elapsed = Date().timeIntervalSince(startedAt)
-            historyStore.record(HistoryEntry(
-                filename: importedVideoURL.lastPathComponent,
-                kind: .split,
-                resultTag: "\(clips.count) clip\(clips.count == 1 ? "" : "s")",
-                sourceDurationSeconds: sourceDurationSeconds,
-                processingSeconds: elapsed,
-                resultAssetIdentifier: firstAssetIdentifier
-            ))
+            if let pendingHistoryID {
+                historyStore.markCompleted(
+                    id: pendingHistoryID,
+                    resultTag: "\(clips.count) clip\(clips.count == 1 ? "" : "s")",
+                    processingSeconds: elapsed,
+                    resultAssetIdentifier: firstAssetIdentifier
+                )
+                self.pendingHistoryID = nil
+            }
         } catch {
             errorMessage = error.localizedDescription
+            if let pendingHistoryID {
+                historyStore.discardPending(id: pendingHistoryID)
+                self.pendingHistoryID = nil
+            }
         }
         try? FileManager.default.removeItem(at: outputDir)
     }
@@ -329,6 +341,10 @@ struct StorySplitView: View {
     }
 
     private func resetState() {
+        if let pendingHistoryID {
+            historyStore.discardPending(id: pendingHistoryID)
+            self.pendingHistoryID = nil
+        }
         importedVideoURL = nil
         player = nil
         sourceDurationSeconds = nil

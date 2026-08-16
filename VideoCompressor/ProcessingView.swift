@@ -76,7 +76,8 @@ struct ProcessingView: View {
             }
             .frame(width: 18, height: 18)
 
-            Text(title)
+            // Text(String) doesn't auto-localize the way Text(literal) does.
+            Text(LocalizedStringKey(title))
                 .font(.caption)
                 .foregroundStyle(index <= activeIndex ? Theme.ink : Theme.inkSoft)
                 .fontWeight(index <= activeIndex ? .semibold : .regular)

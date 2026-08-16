@@ -62,6 +62,31 @@ struct HistoryView: View {
                     .foregroundStyle(Theme.inkSoft)
             }
             Spacer()
+            tag(for: entry)
+        }
+    }
+
+    @ViewBuilder
+    private func tag(for entry: HistoryEntry) -> some View {
+        switch entry.status {
+        case .pending:
+            HStack(spacing: 4) {
+                ProgressView().controlSize(.mini)
+                Text("Processing…")
+            }
+            .font(.caption2.weight(.bold))
+            .padding(.horizontal, 7).padding(.vertical, 3)
+            .background(Theme.surface3)
+            .foregroundStyle(Theme.inkSoft)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+        case .interrupted:
+            Text("Interrupted")
+                .font(.caption2.monospaced().weight(.bold))
+                .padding(.horizontal, 7).padding(.vertical, 3)
+                .background(Theme.discard.opacity(0.15))
+                .foregroundStyle(Theme.discard)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+        case .completed:
             Text(entry.resultTag)
                 .font(.caption2.monospaced().weight(.bold))
                 .padding(.horizontal, 7).padding(.vertical, 3)

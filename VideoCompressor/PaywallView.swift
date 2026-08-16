@@ -9,9 +9,23 @@ struct PaywallView: View {
 
     var reason: String = "You've used all 10 free videos today."
 
+    private var productIsMissing: Bool {
+        subscriptionStore.didAttemptLoad && subscriptionStore.product == nil
+    }
+
     var body: some View {
-        VStack(spacing: 22) {
-            Capsule().fill(Theme.line).frame(width: 36, height: 4).padding(.top, 8)
+        VStack(spacing: 20) {
+            HStack {
+                Spacer()
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Theme.inkSoft)
+                }
+            }
+            .padding(.top, 4)
 
             AppMark(size: 48)
 
@@ -25,9 +39,9 @@ struct PaywallView: View {
             }
 
             VStack(alignment: .leading, spacing: 14) {
-                paywallRow(icon: "arrow.down.right.and.arrow.up.left", text: "Unlimited Compress & Cut, every day")
-                paywallRow(icon: "square.on.square", text: "Find duplicates")
-                paywallRow(icon: "square.split.2x1", text: "Split for Stories")
+                paywallRow(text: "Unlimited Compress & Cut, every day")
+                paywallRow(text: "Find duplicates")
+                paywallRow(text: "Split for Stories")
             }
             .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -47,7 +61,7 @@ struct PaywallView: View {
                             VStack(spacing: 2) {
                                 Text("\(subscriptionStore.product?.displayPrice ?? "$3.99") / month")
                                     .font(.headline)
-                                Text("Cancel anytime")
+                                Text("Billed monthly, cancel anytime")
                                     .font(.caption2)
                                     .opacity(0.8)
                             }
@@ -61,6 +75,13 @@ struct PaywallView: View {
                 }
                 .disabled(subscriptionStore.isPurchasing)
 
+                if productIsMissing {
+                    Text("Not available on the App Store yet — try again shortly.")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.inkSoft)
+                        .multilineTextAlignment(.center)
+                }
+
                 Button {
                     Task { await restore() }
                 } label: {
@@ -72,6 +93,11 @@ struct PaywallView: View {
         }
         .padding(24)
         .background(Theme.paper)
+        .task {
+            if subscriptionStore.product == nil {
+                await subscriptionStore.loadProduct()
+            }
+        }
         .alert("Could not continue", isPresented: .constant(errorMessage != nil), actions: {
             Button("OK") { errorMessage = nil }
         }, message: {
@@ -82,9 +108,9 @@ struct PaywallView: View {
         }
     }
 
-    private func paywallRow(icon: String, text: String) -> some View {
+    private func paywallRow(text: String) -> some View {
         HStack(spacing: 10) {
-            Image(systemName: icon)
+            Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(Theme.accent)
                 .frame(width: 22)
             Text(text)

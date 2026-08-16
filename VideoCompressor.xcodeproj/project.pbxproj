@@ -37,6 +37,7 @@
 		709067EFD406422E3BB6C545 /* VideoCompressorApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */; };
 		73E1A3DD21FF5CBECDDF728F /* CutRenderExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF21A6A9475A7E2243CEA70C /* CutRenderExecutor.swift */; };
 		76570FD75D9F484B5154EF85 /* FFmpeg-Kit in Embed Frameworks */ = {isa = PBXBuildFile; productRef = A24F25A9099F8DCAB4A70F3B /* FFmpeg-Kit */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		7A988F7B5B4E69CAD507633F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 26EC781D45417CF579E63C58 /* Localizable.xcstrings */; };
 		7DE069E6DD8C0F0C55A2426E /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBEC2A102A6B7B789B9EC4CA /* OnboardingView.swift */; };
 		879EF6A993DCD47D5ED96A7C /* CameraRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE11F8B48F0606847394D8B2 /* CameraRecorder.swift */; };
 		9205BFD939C4B7215C9CDB7E /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A139C9ABBEDA8B328BAD133 /* HistoryView.swift */; };
@@ -98,6 +99,7 @@
 		18B48328B1B22F393204EF9A /* CompressOnlyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressOnlyView.swift; sourceTree = "<group>"; };
 		1AFF93387C8FAE8D13950CF1 /* VideoCompressorApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCompressorApp.swift; sourceTree = "<group>"; };
 		1E7515A20B6903B75893B7AA /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
+		26EC781D45417CF579E63C58 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		27DF24B6994634E6D04ADCBF /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		2C7667FEEBDE6F6D2127CFA5 /* AudioExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioExtractor.swift; sourceTree = "<group>"; };
 		329399A27CBE1830C01E9079 /* TranscriptQATests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptQATests.swift; sourceTree = "<group>"; };
@@ -202,6 +204,7 @@
 				5F5140DF4231BF23452C898A /* HistoryThumbnail.swift */,
 				9A139C9ABBEDA8B328BAD133 /* HistoryView.swift */,
 				5FF2CD4F116FC02C35DB4F8E /* HomeView.swift */,
+				26EC781D45417CF579E63C58 /* Localizable.xcstrings */,
 				5D7B2BBDC1104F9C0FC92F85 /* NotificationManager.swift */,
 				FBEC2A102A6B7B789B9EC4CA /* OnboardingView.swift */,
 				54F9DDEE2AC679C3B376A555 /* PaywallView.swift */,
@@ -320,6 +323,7 @@
 			knownRegions = (
 				Base,
 				en,
+				pt,
 			);
 			mainGroup = 344447C5905DD30A83026A12;
 			minimizedProjectReferenceProxies = 1;
@@ -343,6 +347,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5B33EEDA5AFF6F2CF4DC22B9 /* Assets.xcassets in Resources */,
+				7A988F7B5B4E69CAD507633F /* Localizable.xcstrings in Resources */,
 				C2629560267FF6BBC8FF3CE3 /* Secrets.swift.example in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -481,7 +486,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_LANGUAGE = en;
 				DEVELOPMENT_TEAM = 8KHYA6SXUA;
@@ -601,7 +606,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_LANGUAGE = en;
 				DEVELOPMENT_TEAM = 8KHYA6SXUA;

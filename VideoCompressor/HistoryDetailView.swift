@@ -16,6 +16,20 @@ struct HistoryDetailView: View {
             }
             .frame(height: 180)
 
+            if entry.status == .interrupted {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(Theme.discard)
+                    Text("This job never finished - the app was likely closed or ran out of time in the background. Nothing was saved to Photos.")
+                        .font(.caption)
+                        .foregroundStyle(Theme.discard)
+                }
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.discard.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+            }
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.filename).font(.headline)
                 Text(entry.date.formatted(date: .abbreviated, time: .shortened))
@@ -93,7 +107,8 @@ struct HistoryDetailView: View {
                 rows.append(.init(icon: "arrow.down.circle", label: "Space saved", value: ByteFormatting.humanReadableSize(saved)))
             }
         }
-        rows.append(.init(icon: "tag", label: "Result", value: entry.resultTag))
+        let resultValue = entry.status == .interrupted ? "Interrupted" : entry.resultTag
+        rows.append(.init(icon: "tag", label: "Result", value: resultValue))
         if let processing = entry.processingSeconds {
             rows.append(.init(icon: "clock", label: "Processing time", value: Self.formatDuration(processing)))
         }

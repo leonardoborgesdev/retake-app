@@ -1,5 +1,16 @@
 import StoreKit
 
+enum SubscriptionError: LocalizedError {
+    case productUnavailable
+
+    var errorDescription: String? {
+        switch self {
+        case .productUnavailable:
+            return "This subscription isn't available yet — it's still being set up on the App Store. Try again in a bit."
+        }
+    }
+}
+
 /// Wraps the single "Unlimited" auto-renewable subscription. Free tier covers Compress
 /// and Cut up to UsageLimiter's daily cap; Find Duplicates and Split for Stories are
 /// subscriber-only. No tiers, no server-side receipt validation - StoreKit2's
@@ -11,6 +22,7 @@ final class SubscriptionStore: ObservableObject {
 
     @Published private(set) var isSubscribed = false
     @Published private(set) var product: Product?
+    @Published private(set) var didAttemptLoad = false
     @Published var isPurchasing = false
 
     private var updatesTask: Task<Void, Never>?
@@ -29,6 +41,7 @@ final class SubscriptionStore: ObservableObject {
 
     func loadProduct() async {
         product = try? await Product.products(for: [Self.unlimitedProductID]).first
+        didAttemptLoad = true
     }
 
     func refreshEntitlement() async {
@@ -45,7 +58,9 @@ final class SubscriptionStore: ObservableObject {
         if product == nil {
             await loadProduct()
         }
-        guard let product else { return }
+        guard let product else {
+            throw SubscriptionError.productUnavailable
+        }
         isPurchasing = true
         defer { isPurchasing = false }
 

@@ -11,6 +11,18 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .es: return "Español"
         }
     }
+
+    /// Feeds `.environment(\.locale, ...)` at the app root - this is what actually makes
+    /// switching this picker change displayed text, independent of the device's own
+    /// Settings > Language. es has no translations in Localizable.xcstrings yet, so it
+    /// falls back to the English source strings rather than showing blank text.
+    var localeIdentifier: String {
+        switch self {
+        case .en: return "en"
+        case .pt: return "pt"
+        case .es: return "es"
+        }
+    }
 }
 
 enum AppAppearance: String, CaseIterable, Identifiable {

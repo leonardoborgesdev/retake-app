@@ -8,6 +8,7 @@ struct CutOnlyView: View {
     @EnvironmentObject private var subscriptionStore: SubscriptionStore
     @EnvironmentObject private var usageLimiter: UsageLimiter
     @State private var showPaywall = false
+    @State private var pendingHistoryID: UUID?
 
     @State private var showPicker = false
     @State private var isImporting = false
@@ -179,11 +180,20 @@ struct CutOnlyView: View {
             return
         }
         pipelineStartedAt = Date()
+        pendingHistoryID = historyStore.recordPending(
+            filename: importedVideoURL.lastPathComponent,
+            kind: .cut,
+            sourceDurationSeconds: sourceDurationSeconds
+        )
         NotificationManager.requestAuthorizationIfNeeded()
         if let result = await editingPipeline.run(sourceURL: importedVideoURL) {
             await save(url: result, sourceName: importedVideoURL.lastPathComponent)
         } else if let message = editingPipeline.errorMessage {
             errorMessage = message
+            if let pendingHistoryID {
+                historyStore.discardPending(id: pendingHistoryID)
+                self.pendingHistoryID = nil
+            }
         }
     }
 
@@ -193,6 +203,10 @@ struct CutOnlyView: View {
             await save(url: result, sourceName: sourceName)
         } else if let message = editingPipeline.errorMessage {
             errorMessage = message
+            if let pendingHistoryID {
+                historyStore.discardPending(id: pendingHistoryID)
+                self.pendingHistoryID = nil
+            }
         }
     }
 
@@ -209,21 +223,30 @@ struct CutOnlyView: View {
             )
             let cutCount = editingPipeline.cutCount
             let elapsed = pipelineStartedAt.map { Date().timeIntervalSince($0) }
-            historyStore.record(HistoryEntry(
-                filename: sourceName,
-                kind: .cut,
-                resultTag: "\(cutCount) cut\(cutCount == 1 ? "" : "s")",
-                sourceDurationSeconds: sourceDurationSeconds,
-                processingSeconds: elapsed,
-                resultAssetIdentifier: assetIdentifier
-            ))
+            if let pendingHistoryID {
+                historyStore.markCompleted(
+                    id: pendingHistoryID,
+                    resultTag: "\(cutCount) cut\(cutCount == 1 ? "" : "s")",
+                    processingSeconds: elapsed,
+                    resultAssetIdentifier: assetIdentifier
+                )
+                self.pendingHistoryID = nil
+            }
             try? FileManager.default.removeItem(at: url)
         } catch {
             errorMessage = error.localizedDescription
+            if let pendingHistoryID {
+                historyStore.discardPending(id: pendingHistoryID)
+                self.pendingHistoryID = nil
+            }
         }
     }
 
     private func resetState() {
+        if let pendingHistoryID {
+            historyStore.discardPending(id: pendingHistoryID)
+            self.pendingHistoryID = nil
+        }
         importedVideoURL = nil
         player = nil
         didSave = false

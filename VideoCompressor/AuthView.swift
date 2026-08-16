@@ -41,6 +41,19 @@ struct AuthView: View {
         }, message: {
             Text(errorMessage ?? "")
         })
+        .onAppear {
+#if DEBUG
+            // Debug-only: `defaults write <bundle-id> debugEmail -string "..."` +
+            // debugPassword lets QA/screenshot runs skip typing credentials by hand.
+            // Compiled out of Release entirely.
+            if let debugEmail = UserDefaults.standard.string(forKey: "debugEmail"), !debugEmail.isEmpty,
+               let debugPassword = UserDefaults.standard.string(forKey: "debugPassword"), !debugPassword.isEmpty {
+                Task {
+                    try? await accountStore.logIn(email: debugEmail, password: debugPassword)
+                }
+            }
+#endif
+        }
     }
 
     private var form: some View {

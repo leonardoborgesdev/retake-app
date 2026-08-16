@@ -19,11 +19,15 @@ struct FeatureInfoCard: View {
                         .font(.caption)
                         .foregroundStyle(Theme.accent)
                         .frame(width: 18)
-                    Text(row.label)
+                    // Text(String) doesn't auto-localize the way Text(literal) does - Row's
+                    // fields are String (set from literals at each call site), so this
+                    // wraps them back into LocalizedStringKey to actually hit
+                    // Localizable.xcstrings instead of always showing the English source.
+                    Text(LocalizedStringKey(row.label))
                         .font(.caption)
                         .foregroundStyle(Theme.inkSoft)
                     Spacer()
-                    Text(row.value)
+                    Text(LocalizedStringKey(row.value))
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(Theme.ink)
                         .multilineTextAlignment(.trailing)

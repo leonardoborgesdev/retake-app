@@ -8,13 +8,17 @@ Filming yourself on an iPhone means you almost always stumble a line, say it twi
 
 ## Features
 
-- **On-device video compression** — re-encodes to H.265/HEVC using the iPhone's hardware encoder (`hevc_videotoolbox`), with real-time VideoToolbox mode for faster exports. No upload, no server, no account required.
-- **Silence & retake detection** *(bonus, not in-app)* — transcribes the audio, finds silence gaps and repeated phrases, and surfaces a review screen where you pick which take to keep. Fully implemented and tested in isolation, but not linked from Home — see Status.
-- **Record with teleprompter** *(bonus, not in-app)* — native camera capture with an auto-scrolling script overlay, chained into Compress/Cut. Also implemented and not linked from Home.
+- **On-device video compression** — re-encodes to H.265/HEVC using the iPhone's hardware encoder (`hevc_videotoolbox`), with real-time VideoToolbox mode for faster exports. No upload, no server, no account required. Batch/queue mode compresses several videos in a row.
+- **Cut silence & retakes** — transcribes the audio, finds dead air and repeated lines, and surfaces a review screen where you pick which take to keep. The app's real differentiator: this kind of retake-aware editing otherwise only exists in desktop plugins or web SaaS.
+- **Find Duplicates** — groups same-length videos recorded the same day (the copies Compress tends to leave behind) and lets you clean them up, on-device.
+- **Split for Stories** — cuts one long recording into ordered, fixed-length clips ready to post.
+- **Record with teleprompter** *(bonus, not linked from Home)* — native camera capture with an auto-scrolling script overlay, chained straight into Compress or Cut.
+- **Free tier + subscription** — Compress and Cut are free up to 10 videos/day; Find Duplicates and Split for Stories, plus the daily cap, are unlocked by retake. Unlimited ($3.99/mo). All four tools stay usable up to the point of real value (scanning, splitting) before any paywall appears.
+- **Native iOS 26 Liquid Glass** — real `.glassEffect()` material (not a recreation) throughout the app on iOS 26+: cards, primary/secondary/destructive buttons, and floating controls like Record's live REC badge. Falls back to the original solid design on iOS 16–25, unchanged.
+- **English + Portuguese (BR) localization**, switchable in-app without restarting.
+- **Sign in with Apple**, plus email/password auth against Supabase.
 - **Delete original from Photos** (opt-in) — reclaim storage after compressing, without losing the source unless you choose to.
-- **Local run history** — every compress/cut session is logged on-device.
-- **Nine implemented screens** — splash, onboarding, auth, home, compress, processing, retake review, history, and account.
-- **Local-only auth** — the account flow runs entirely against the Keychain out of the box; no backend is required to build and run the app.
+- **Local run history** — every job is logged on-device the moment it starts (so an interrupted job shows up as "Interrupted" instead of silently vanishing), with a Photos thumbnail once it's done.
 
 ## Tech stack
 
@@ -59,6 +63,8 @@ Real screenshots, iPhone 17 Simulator, iOS 26.5:
 |---|---|---|---|
 | ![onboarding](docs/screenshots/onboarding.png) | ![login](docs/screenshots/login.png) | ![home](docs/screenshots/home.png) | ![account](docs/screenshots/account.png) |
 
+*(Screenshots predate the build-14 Liquid Glass pass and the Find Duplicates/Split for Stories tools on Home — updated captures are coming.)*
+
 Full visual identity reference (logo, palette, type, and every screen mocked up before implementation) is in `docs/design-mockup.md`.
 
 ## Project structure
@@ -85,15 +91,28 @@ docs/
 
 ## Status
 
-All 9 mockup screens are implemented and match the design spec. The build compiles cleanly and all 30 tests pass. It's been run and tested end-to-end in the iPhone 17 Simulator. Physical-device testing is still pending.
+Home surfaces all four tools — Compress, Cut silence & retakes, Find Duplicates, Split for Stories, in that order. The build compiles cleanly and all 30 tests pass. Distributed via TestFlight (build 14 as of this writing); the App Store Connect listing (subscription product, review demo account, screenshots) is still being finished.
 
-**The app's focus is Compress.** Home only surfaces the compression flow — the one that's been exercised end-to-end and is closest to production-ready. Record (native camera + teleprompter) and Cut (silence/retake review) are real, working features with their own views and pipelines, but they're intentionally kept out of the app's navigation and documented here as bonus/optional rather than presented as equally core. They're a one-line change away from being wired back into Home if that becomes the priority.
+Record (native camera + teleprompter) stays a bonus feature, implemented and working but not linked from Home yet.
 
 Known limitations:
 
-- Compression presets and language settings in Account are currently display-only.
+- Not yet live on the public App Store — TestFlight only while the subscription product and store listing are finalized.
 - The delete-original-from-Photos flow and the full cut/retake pipeline haven't been verified end-to-end on a physical device with a real AssemblyAI key yet.
-- Not distributed on the App Store — sideloaded via Xcode.
+
+## Version history
+
+| Build | Highlights |
+|---|---|
+| 14 | Native iOS 26 Liquid Glass extended from primary buttons to every card, secondary/destructive/outlined button, and floating badge app-wide (Home tiles, Record's live camera controls, paywall, batch review screens). |
+| 13 | Finished 100% EN/PT localization coverage (Onboarding, Record, Cut review, Auth screens) and fixed a stale string that had silently reverted to English. |
+| 12 | Adopted native iOS 26 Liquid Glass on primary CTA buttons; fixed a broken negative-percentage size estimate. |
+| 11 | Let free users try Find Duplicates and Split for Stories up to the point of real value before paywalling; redesigned the paywall with real benefits; fixed a History detail layout bug. |
+| 10 | Finished full-app EN/PT localization, including counters and plurals; added live elapsed/remaining time to Compress and Cut; confirmed no real max-file-size limit. |
+| 9 | Fixed foreground notifications and a silent purchase-load failure; made History resilient to interrupted jobs (shown as "Interrupted" instead of vanishing); shipped functional EN/PT localization. |
+| 7 | Added the subscription paywall (10 free Compress/Cut videos a day, $3.99/mo Unlimited) and enabled Sign in with Apple. |
+| 6 | Fixed a real Split for Stories crash (an ffmpeg `-map 0` issue with iPhone timecode tracks); added Photos thumbnails to History, a batch-compress review screen, and reordered Home to Compress → Cut → Duplicates → Split. |
+| 1–5 | Initial build: Find Duplicates as the 4th tool, batch compress, Split for Stories, delete-original toggle, account deletion, forgot password, local notifications. |
 
 ## Credits
 

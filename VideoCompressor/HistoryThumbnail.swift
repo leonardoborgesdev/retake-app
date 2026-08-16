@@ -11,25 +11,31 @@ struct HistoryThumbnail: View {
     var height: CGFloat = 44
     var cornerRadius: CGFloat = 8
     var iconSize: Font = .caption
+    /// List rows stay silent about permission (see loadThumbnail) - the Detail screen,
+    /// which the user reached by deliberately tapping into one specific video, is a
+    /// reasonable, expected point to actually ask if access hasn't been granted yet.
+    var requestsAccessIfNeeded: Bool = false
 
     @State private var image: UIImage?
 
-    init(assetIdentifier: String?, fallbackIcon: String, size: CGFloat = 44, cornerRadius: CGFloat = 8, iconSize: Font = .caption) {
+    init(assetIdentifier: String?, fallbackIcon: String, size: CGFloat = 44, cornerRadius: CGFloat = 8, iconSize: Font = .caption, requestsAccessIfNeeded: Bool = false) {
         self.assetIdentifier = assetIdentifier
         self.fallbackIcon = fallbackIcon
         self.width = size
         self.height = size
         self.cornerRadius = cornerRadius
         self.iconSize = iconSize
+        self.requestsAccessIfNeeded = requestsAccessIfNeeded
     }
 
-    init(assetIdentifier: String?, fallbackIcon: String, width: CGFloat, height: CGFloat, cornerRadius: CGFloat = 8, iconSize: Font = .system(size: 36)) {
+    init(assetIdentifier: String?, fallbackIcon: String, width: CGFloat, height: CGFloat, cornerRadius: CGFloat = 8, iconSize: Font = .system(size: 36), requestsAccessIfNeeded: Bool = false) {
         self.assetIdentifier = assetIdentifier
         self.fallbackIcon = fallbackIcon
         self.width = width
         self.height = height
         self.cornerRadius = cornerRadius
         self.iconSize = iconSize
+        self.requestsAccessIfNeeded = requestsAccessIfNeeded
     }
 
     var body: some View {
@@ -64,7 +70,11 @@ struct HistoryThumbnail: View {
         // of just calling fetchAssets, keeps History from surprising those users with a
         // permission sheet the moment they open it. Thumbnails only appear once the user
         // has already granted read access some other way (e.g. via Find Duplicates).
-        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        var status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        if status == .notDetermined && requestsAccessIfNeeded {
+            _ = await PhotoLibrarySaver.requestReadWriteAuthorization()
+            status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        }
         guard status == .authorized || status == .limited else { return }
 
         let fetchResult = PHAsset.fetchAssets(withLocalIdentifiers: [assetIdentifier], options: nil)

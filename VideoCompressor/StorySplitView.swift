@@ -37,6 +37,14 @@ struct StorySplitView: View {
     @State private var savedCount = 0
     @State private var didFinish = false
     @State private var errorMessage: String?
+    // Splitting itself is free for everyone - it's local and fast. Only saving the
+    // result to Photos is gated, so a free user gets to see real clips (count, names)
+    // before deciding whether to subscribe, instead of hitting a paywall on a button
+    // they haven't gotten any value from yet.
+    @State private var pendingClipURLs: [URL] = []
+    @State private var pendingOutputDir: URL?
+    @State private var isSavingClips = false
+    @State private var savedToPhotos = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -52,11 +60,7 @@ struct StorySplitView: View {
                 } else {
                     segmentPicker
                     Button {
-                        if subscriptionStore.isSubscribed {
-                            Task { await split() }
-                        } else {
-                            showPaywall = true
-                        }
+                        Task { await split() }
                     } label: {
                         // A ternary here would make the whole expression a plain String,
                         // which Text() does not auto-localize the way a literal does -
@@ -193,16 +197,27 @@ struct StorySplitView: View {
 
     private var finishedView: some View {
         VStack(spacing: 14) {
-            Label {
-                Text("\(resultURLs.count) ") + Text("clips saved to Photos")
-            } icon: {
-                Image(systemName: "checkmark.circle.fill")
+            if savedToPhotos {
+                Label {
+                    Text("\(resultURLs.count) ") + Text("clips saved to Photos")
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill")
+                }
+                    .foregroundStyle(Theme.accent)
+                    .font(.subheadline.weight(.semibold))
+            } else {
+                Label {
+                    Text("\(pendingClipURLs.count) ") + Text("clips ready")
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill")
+                }
+                    .foregroundStyle(Theme.accent)
+                    .font(.subheadline.weight(.semibold))
             }
-                .foregroundStyle(Theme.accent)
-                .font(.subheadline.weight(.semibold))
 
             VStack(spacing: 0) {
-                ForEach(Array(resultURLs.enumerated()), id: \.offset) { index, url in
+                let clips = savedToPhotos ? resultURLs : pendingClipURLs
+                ForEach(Array(clips.enumerated()), id: \.offset) { index, url in
                     HStack(spacing: 10) {
                         Text("\(index + 1)")
                             .font(.caption.monospaced().weight(.bold))
@@ -214,7 +229,7 @@ struct StorySplitView: View {
                         Spacer()
                     }
                     .padding(.vertical, 6)
-                    if index < resultURLs.count - 1 {
+                    if index < clips.count - 1 {
                         Divider().overlay(Theme.line)
                     }
                 }
@@ -222,6 +237,33 @@ struct StorySplitView: View {
             .padding(.horizontal, 14)
             .background(Theme.surface2)
             .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+
+            if !savedToPhotos {
+                Button {
+                    Task { await saveClipsToPhotos() }
+                } label: {
+                    if isSavingClips {
+                        ProgressView().tint(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Theme.board)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                    } else {
+                        HStack(spacing: 6) {
+                            if !subscriptionStore.isSubscribed {
+                                Image(systemName: "lock.fill")
+                            }
+                            Text("Save to Photos")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Theme.board)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                    }
+                }
+                .disabled(isSavingClips)
+            }
 
             Button {
                 resetState()
@@ -259,13 +301,6 @@ struct StorySplitView: View {
         isSplitting = true
         splitProgress = 0
         defer { isSplitting = false }
-        NotificationManager.requestAuthorizationIfNeeded()
-
-        pendingHistoryID = historyStore.recordPending(
-            filename: importedVideoURL.lastPathComponent,
-            kind: .split,
-            sourceDurationSeconds: sourceDurationSeconds
-        )
 
         let outputDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("split-\(UUID().uuidString)")
@@ -278,7 +313,6 @@ struct StorySplitView: View {
             segmentSeconds: segmentDuration.rawValue
         )
 
-        let startedAt = Date()
         do {
             try await runFFmpeg(command: command, totalDuration: sourceDurationSeconds)
 
@@ -288,37 +322,66 @@ struct StorySplitView: View {
                 throw StorySplitError.ffmpegFailed("no clips were produced")
             }
 
+            // Splitting itself is free and done at this point - nothing is saved to
+            // Photos yet, so the result is just a local preview until saveClipsToPhotos.
+            pendingClipURLs = clips
+            pendingOutputDir = outputDir
+            didFinish = true
+        } catch {
+            errorMessage = error.localizedDescription
+            try? FileManager.default.removeItem(at: outputDir)
+        }
+    }
+
+    private func saveClipsToPhotos() async {
+        guard !pendingClipURLs.isEmpty else { return }
+        guard subscriptionStore.isSubscribed else {
+            showPaywall = true
+            return
+        }
+        isSavingClips = true
+        defer { isSavingClips = false }
+        NotificationManager.requestAuthorizationIfNeeded()
+
+        let pendingHistoryID = historyStore.recordPending(
+            filename: importedVideoURL?.lastPathComponent ?? "video.mov",
+            kind: .split,
+            sourceDurationSeconds: sourceDurationSeconds
+        )
+        self.pendingHistoryID = pendingHistoryID
+
+        let startedAt = Date()
+        do {
             var firstAssetIdentifier: String?
-            for clip in clips {
+            for clip in pendingClipURLs {
                 let identifier = try await PhotoLibrarySaver.save(videoURL: clip)
                 if firstAssetIdentifier == nil { firstAssetIdentifier = identifier }
                 savedCount += 1
             }
-            resultURLs = clips
-            didFinish = true
+            resultURLs = pendingClipURLs
+            savedToPhotos = true
             NotificationManager.notifyJobFinished(
                 title: "Split for Stories finished",
-                body: "\(clips.count) clip\(clips.count == 1 ? "" : "s") ready in Photos."
+                body: "\(pendingClipURLs.count) clip\(pendingClipURLs.count == 1 ? "" : "s") ready in Photos."
             )
 
             let elapsed = Date().timeIntervalSince(startedAt)
-            if let pendingHistoryID {
-                historyStore.markCompleted(
-                    id: pendingHistoryID,
-                    resultTag: "\(clips.count) clip\(clips.count == 1 ? "" : "s")",
-                    processingSeconds: elapsed,
-                    resultAssetIdentifier: firstAssetIdentifier
-                )
-                self.pendingHistoryID = nil
-            }
+            historyStore.markCompleted(
+                id: pendingHistoryID,
+                resultTag: "\(resultURLs.count) clip\(resultURLs.count == 1 ? "" : "s")",
+                processingSeconds: elapsed,
+                resultAssetIdentifier: firstAssetIdentifier
+            )
+            self.pendingHistoryID = nil
         } catch {
             errorMessage = error.localizedDescription
-            if let pendingHistoryID {
-                historyStore.discardPending(id: pendingHistoryID)
-                self.pendingHistoryID = nil
-            }
+            historyStore.discardPending(id: pendingHistoryID)
+            self.pendingHistoryID = nil
         }
-        try? FileManager.default.removeItem(at: outputDir)
+        if let pendingOutputDir {
+            try? FileManager.default.removeItem(at: pendingOutputDir)
+        }
+        pendingOutputDir = nil
     }
 
     private func runFFmpeg(command: String, totalDuration: Double) async throws {
@@ -358,10 +421,16 @@ struct StorySplitView: View {
             historyStore.discardPending(id: pendingHistoryID)
             self.pendingHistoryID = nil
         }
+        if let pendingOutputDir {
+            try? FileManager.default.removeItem(at: pendingOutputDir)
+            self.pendingOutputDir = nil
+        }
         importedVideoURL = nil
         player = nil
         sourceDurationSeconds = nil
         resultURLs = []
+        pendingClipURLs = []
+        savedToPhotos = false
         savedCount = 0
         didFinish = false
         errorMessage = nil

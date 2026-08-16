@@ -6,7 +6,7 @@ enum SubscriptionError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .productUnavailable:
-            return "This subscription isn't available yet — it's still being set up on the App Store. Try again in a bit."
+            return "This subscription isn't available yet. It's still being set up on the App Store, try again in a bit."
         }
     }
 }

@@ -31,7 +31,7 @@ struct OnboardingView: View {
                     OnboardingPage(
                         headline: "Detect every\nsilent gap",
                         cardTitle: "Hear the problem",
-                        cardSubtitle: "Amber segments are dead air — the same audio that would sit untouched in a plain edit."
+                        cardSubtitle: "Amber segments are dead air: the same audio that would sit untouched in a plain edit."
                     ) {
                         WaveformDemo(style: .original)
                     }

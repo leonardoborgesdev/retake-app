@@ -1,7 +1,9 @@
 import SwiftUI
 
-/// Shown when a free user hits the daily Compress/Cut limit, or taps Find Duplicates /
-/// Split for Stories (subscriber-only, no free allowance at all for those two).
+/// Shown when a free user hits the daily Compress/Cut limit, taps "Delete selected" in
+/// Find Duplicates, or taps "Save to Photos" after a Split - all three tools stay usable
+/// for free up to that point, so this is reached only once there's real value on screen
+/// to point back to, not as a cold wall before anything has happened.
 struct PaywallView: View {
     @EnvironmentObject private var subscriptionStore: SubscriptionStore
     @Environment(\.dismiss) private var dismiss
@@ -14,7 +16,7 @@ struct PaywallView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
             HStack {
                 Spacer()
                 Button {
@@ -27,28 +29,55 @@ struct PaywallView: View {
             }
             .padding(.top, 4)
 
-            AppMark(size: 48)
+            AppMark(size: 52)
+                .padding(.top, 8)
 
             VStack(spacing: 6) {
                 Text("retake. Unlimited")
-                    .font(Theme.displayFont(22))
+                    .font(Theme.displayFont(24))
                 Text(reason)
                     .font(.subheadline)
                     .foregroundStyle(Theme.inkSoft)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.top, 14)
 
-            VStack(alignment: .leading, spacing: 14) {
-                paywallRow(text: "Unlimited Compress & Cut, every day")
-                paywallRow(text: "Find duplicates")
-                paywallRow(text: "Split for Stories")
+            VStack(spacing: 0) {
+                benefitRow(
+                    icon: "arrow.down.right.and.arrow.up.left",
+                    title: "Compress & Cut without the daily cap",
+                    detail: "No more counting down to 10 a day"
+                )
+                Divider().overlay(Theme.line).padding(.leading, 54)
+                benefitRow(
+                    icon: "square.on.square",
+                    title: "Find Duplicates",
+                    detail: "Clean up the copies Compress leaves behind"
+                )
+                Divider().overlay(Theme.line).padding(.leading, 54)
+                benefitRow(
+                    icon: "square.split.2x1",
+                    title: "Split for Stories",
+                    detail: "Ready-to-post clips, cut in seconds"
+                )
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 6)
             .background(Theme.surface2)
             .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            .padding(.top, 20)
 
-            Spacer()
+            Spacer(minLength: 20)
+
+            VStack(spacing: 4) {
+                Text(subscriptionStore.product?.displayPrice ?? "$3.99")
+                    .font(Theme.displayFont(30))
+                    .foregroundStyle(Theme.accent)
+                Text("per month, cancel anytime")
+                    .font(.caption)
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            .padding(.bottom, 14)
 
             VStack(spacing: 10) {
                 Button {
@@ -58,17 +87,12 @@ struct PaywallView: View {
                         if subscriptionStore.isPurchasing {
                             ProgressView().tint(.white)
                         } else {
-                            VStack(spacing: 2) {
-                                Text("\(subscriptionStore.product?.displayPrice ?? "$3.99") / month")
-                                    .font(.headline)
-                                Text("Billed monthly, cancel anytime")
-                                    .font(.caption2)
-                                    .opacity(0.8)
-                            }
+                            Text("Get Unlimited")
+                                .font(.headline)
                         }
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
+                    .padding(.vertical, 14)
                     .background(Theme.board)
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
@@ -76,7 +100,7 @@ struct PaywallView: View {
                 .disabled(subscriptionStore.isPurchasing)
 
                 if productIsMissing {
-                    Text("Not available on the App Store yet — try again shortly.")
+                    Text("Not available on the App Store yet. Try again shortly.")
                         .font(.caption2)
                         .foregroundStyle(Theme.inkSoft)
                         .multilineTextAlignment(.center)
@@ -108,14 +132,26 @@ struct PaywallView: View {
         }
     }
 
-    private func paywallRow(text: String) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: "checkmark.circle.fill")
+    private func benefitRow(icon: String, title: String, detail: String) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
                 .foregroundStyle(Theme.accent)
-                .frame(width: 22)
-            Text(text)
-                .font(.subheadline)
+                .frame(width: 30, height: 30)
+                .background(Theme.accentSoft)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(Theme.inkSoft)
+            }
+            Spacer(minLength: 0)
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 
     private func purchase() async {

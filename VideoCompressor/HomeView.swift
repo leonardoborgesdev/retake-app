@@ -11,7 +11,7 @@ struct HomeView: View {
                 FeatureCard(
                     systemImage: "arrow.down.right.and.arrow.up.left",
                     title: "Compress video",
-                    subtitle: "Smaller file, sharper result — on-device, no upload. Any length, any size."
+                    subtitle: "Smaller file, sharper result. Processed on-device, nothing uploaded. Any length, any size."
                 )
             }
 

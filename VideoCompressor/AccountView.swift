@@ -2,25 +2,22 @@ import SwiftUI
 import StoreKit
 
 enum AppLanguage: String, CaseIterable, Identifiable {
-    case en, pt, es
+    case en, pt
     var id: String { rawValue }
     var label: String {
         switch self {
         case .en: return "English"
         case .pt: return "Português (Brasil)"
-        case .es: return "Español"
         }
     }
 
     /// Feeds `.environment(\.locale, ...)` at the app root - this is what actually makes
     /// switching this picker change displayed text, independent of the device's own
-    /// Settings > Language. es has no translations in Localizable.xcstrings yet, so it
-    /// falls back to the English source strings rather than showing blank text.
+    /// Settings > Language.
     var localeIdentifier: String {
         switch self {
         case .en: return "en"
         case .pt: return "pt"
-        case .es: return "es"
         }
     }
 }
@@ -71,7 +68,7 @@ struct AccountView: View {
                         .overlay(Text(initials).font(.headline.weight(.heavy)).foregroundStyle(Theme.accent))
 
                     VStack(spacing: 2) {
-                        Text(accountStore.session?.name ?? "-").font(.headline)
+                        Text(accountStore.session?.name ?? "").font(.headline)
                         Text(accountStore.session?.email ?? "").font(.caption).foregroundStyle(Theme.inkSoft)
                         if let createdAt = accountStore.session?.createdAt {
                             Text("Member since \(createdAt.formatted(date: .abbreviated, time: .omitted))")
@@ -137,6 +134,17 @@ struct AccountView: View {
                 SecureField("AssemblyAI API key", text: $apiKey)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+
+                Button("Save API key") {
+                    try? APIKeyStore.save(apiKey)
+                    savedConfirmation = true
+                }
+                .disabled(apiKey.isEmpty)
+
+                if savedConfirmation {
+                    Label("API key saved", systemImage: "checkmark.circle.fill")
+                        .foregroundStyle(Theme.accent)
+                }
             } header: {
                 Text("Cut silence & retakes")
             } footer: {
@@ -175,24 +183,11 @@ struct AccountView: View {
                 HStack {
                     Text("Support")
                     Spacer()
-                    Text("leooborges27@gmail.com").foregroundStyle(Theme.inkSoft)
-                }
-            }
-
-            if savedConfirmation {
-                Section {
-                    Label("API key saved", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(Theme.accent)
+                    Text("retake@devtrip.shop").foregroundStyle(Theme.inkSoft)
                 }
             }
 
             Section {
-                Button("Save API key") {
-                    try? APIKeyStore.save(apiKey)
-                    savedConfirmation = true
-                }
-                .disabled(apiKey.isEmpty)
-
                 Button("Sign out", role: .destructive) {
                     accountStore.signOut()
                 }
@@ -268,7 +263,7 @@ struct AccountView: View {
     }
 
     private var lastActivityLabel: String {
-        guard let mostRecent = historyStore.entries.first else { return "-" }
+        guard let mostRecent = historyStore.entries.first else { return "None yet" }
         return mostRecent.date.formatted(date: .abbreviated, time: .omitted)
     }
 

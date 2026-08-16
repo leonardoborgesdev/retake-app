@@ -177,7 +177,22 @@
     "last activity" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "última atividade" } } } },
     "total" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "total" } } } },
     "elapsed" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "decorridos" } } } },
-    "remaining" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "restantes" } } } }
+    "remaining" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "restantes" } } } },
+    "Smaller file, sharper result. Processed on-device, nothing uploaded. Any length, any size." : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Arquivo menor, resultado nítido. Processado no aparelho, nada enviado pra nuvem. Qualquer duração, qualquer tamanho." } } } },
+    "Amber segments are dead air: the same audio that would sit untouched in a plain edit." : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Os trechos em âmbar são silêncio: o mesmo áudio que ficaria intacto numa edição simples." } } } },
+    "Large or iCloud videos can take a moment to download. No size limit, just hang tight." : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Vídeos grandes ou do iCloud podem levar um tempo pra baixar. Sem limite de tamanho, só aguarde." } } } },
+    "None, even 4K or long takes" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Nenhum, mesmo em 4K ou gravações longas" } } } },
+    "None, even long recordings" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Nenhum, mesmo em gravações longas" } } } },
+    "Scans for videos with the same length recorded the same day: the copies Compress and re-imports tend to leave behind." : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Escaneia vídeos do mesmo tamanho gravados no mesmo dia: as cópias que Comprimir e reimportações costumam deixar pra trás." } } } },
+    "This job never finished. The app was likely closed or ran out of time in the background, so nothing was saved to Photos." : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Esse processo nunca terminou. O app provavelmente foi fechado ou ficou sem tempo em segundo plano, então nada foi salvo nas Fotos." } } } },
+    "Compress & Cut without the daily cap" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Comprimir e Cortar sem o limite diário" } } } },
+    "No more counting down to 10 a day" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Sem ficar contando os 10 por dia" } } } },
+    "Clean up the copies Compress leaves behind" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Limpa as cópias que Comprimir deixa pra trás" } } } },
+    "Ready-to-post clips, cut in seconds" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Clipes prontos pra postar, cortados em segundos" } } } },
+    "per month, cancel anytime" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "por mês, cancele quando quiser" } } } },
+    "Get Unlimited" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Assinar o Ilimitado" } } } },
+    "clips ready" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "clipes prontos" } } } },
+    "None yet" : { "localizations" : { "pt" : { "stringUnit" : { "state" : "translated", "value" : "Nenhuma ainda" } } } }
   },
   "version" : "1.0"
 }

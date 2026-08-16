@@ -39,6 +39,7 @@ struct CompressOnlyView: View {
     @State private var batchQueue: [PickedVideo] = []
     @State private var showBatchReview = false
     @State private var isBatchProcessing = false
+    @State private var batchStartedAt: Date?
     @State private var batchIndex = 0
     @State private var batchResults: [(filename: String, before: Int64, after: Int64)] = []
     @State private var batchDone = false
@@ -140,7 +141,7 @@ struct CompressOnlyView: View {
                     Text("Preparing video…")
                         .font(.subheadline)
                         .foregroundStyle(Theme.inkSoft)
-                    Text("Large or iCloud videos can take a moment to download - no size limit, just hang tight.")
+                    Text("Large or iCloud videos can take a moment to download. No size limit, just hang tight.")
                         .font(.caption)
                         .foregroundStyle(Theme.inkSoft)
                         .multilineTextAlignment(.center)
@@ -165,7 +166,7 @@ struct CompressOnlyView: View {
                         .init(icon: "wand.and.stars", label: "What it does", value: "Re-encodes to HEVC on-device"),
                         .init(icon: "clock", label: "Takes about", value: "10–90s, depends on length"),
                         .init(icon: "checkmark.seal", label: "Benefit", value: "Up to 80% smaller, same look"),
-                        .init(icon: "infinity", label: "Size limit", value: "None - 4K, long takes, all fine"),
+                        .init(icon: "infinity", label: "Size limit", value: "None, even 4K or long takes"),
                     ])
                 }
                 .padding(.top, 32)
@@ -331,6 +332,24 @@ struct CompressOnlyView: View {
                         .foregroundStyle(Theme.inkSoft)
                         .lineLimit(1)
 
+                    if let batchStartedAt {
+                        let overallFraction = (Double(batchIndex) + compressionService.progress) / Double(max(batchQueue.count, 1))
+                        TimelineView(.periodic(from: batchStartedAt, by: 1)) { context in
+                            let elapsed = context.date.timeIntervalSince(batchStartedAt)
+                            HStack(spacing: 4) {
+                                Text(Self.formatBatchDuration(elapsed))
+                                Text("elapsed")
+                                if overallFraction > 0.02 {
+                                    Text("·")
+                                    Text(Self.formatBatchDuration(elapsed * (1 - overallFraction) / overallFraction))
+                                    Text("remaining")
+                                }
+                            }
+                            .font(.caption2)
+                            .foregroundStyle(Theme.inkSoft)
+                        }
+                    }
+
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
                             Capsule().fill(Theme.surface2)
@@ -411,6 +430,13 @@ struct CompressOnlyView: View {
         }
     }
 
+    private static func formatBatchDuration(_ seconds: Double) -> String {
+        let total = max(0, Int(seconds.rounded()))
+        let minutes = total / 60
+        let secs = total % 60
+        return minutes > 0 ? "\(minutes)m \(secs)s" : "\(secs)s"
+    }
+
     private func processBatch() async {
         guard subscriptionStore.isSubscribed || usageLimiter.canUse(count: batchQueue.count) else {
             paywallReason = "This batch needs \(batchQueue.count) of your free videos today, but only \(usageLimiter.remainingToday) are left."
@@ -418,6 +444,7 @@ struct CompressOnlyView: View {
             return
         }
         isBatchProcessing = true
+        batchStartedAt = Date()
         batchResults = []
         defer { isBatchProcessing = false; batchDone = true }
         NotificationManager.requestAuthorizationIfNeeded()

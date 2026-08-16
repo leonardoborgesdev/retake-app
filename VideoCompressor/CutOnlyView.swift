@@ -63,7 +63,7 @@ struct CutOnlyView: View {
                     Text("Preparing video…")
                         .font(.subheadline)
                         .foregroundStyle(Theme.inkSoft)
-                    Text("Large or iCloud videos can take a moment to download - no size limit, just hang tight.")
+                    Text("Large or iCloud videos can take a moment to download. No size limit, just hang tight.")
                         .font(.caption)
                         .foregroundStyle(Theme.inkSoft)
                         .multilineTextAlignment(.center)
@@ -88,7 +88,7 @@ struct CutOnlyView: View {
                         .init(icon: "waveform.badge.magnifyingglass", label: "What it does", value: "Transcribes, finds gaps & retakes"),
                         .init(icon: "clock", label: "Takes about", value: "~1 min per minute of video"),
                         .init(icon: "checkmark.seal", label: "Benefit", value: "No desktop edit, you pick the take"),
-                        .init(icon: "infinity", label: "Size limit", value: "None - long recordings are fine"),
+                        .init(icon: "infinity", label: "Size limit", value: "None, even long recordings"),
                     ])
                 }
                 .padding(.top, 32)

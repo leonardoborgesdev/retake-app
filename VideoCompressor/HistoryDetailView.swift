@@ -4,56 +4,61 @@ struct HistoryDetailView: View {
     let entry: HistoryEntry
 
     var body: some View {
-        VStack(spacing: 20) {
-            GeometryReader { geo in
-                HistoryThumbnail(
-                    assetIdentifier: entry.resultAssetIdentifier,
-                    fallbackIcon: kindIcon,
-                    width: geo.size.width,
-                    height: 180,
-                    cornerRadius: Theme.cardRadius
-                )
-            }
-            .frame(height: 180)
-
-            if entry.status == .interrupted {
-                HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(Theme.discard)
-                    Text("This job never finished - the app was likely closed or ran out of time in the background. Nothing was saved to Photos.")
-                        .font(.caption)
-                        .foregroundStyle(Theme.discard)
+        // Was a plain VStack with a Spacer() pushing the button to the bottom - on
+        // taller content (e.g. the interrupted banner adding height) there was no room
+        // left for the Spacer to expand into, and the button rendered past the bottom
+        // of the screen, behind the tab bar. A ScrollView means it's always reachable.
+        ScrollView {
+            VStack(spacing: 20) {
+                GeometryReader { geo in
+                    HistoryThumbnail(
+                        assetIdentifier: entry.resultAssetIdentifier,
+                        fallbackIcon: kindIcon,
+                        width: geo.size.width,
+                        height: 180,
+                        cornerRadius: Theme.cardRadius,
+                        requestsAccessIfNeeded: true
+                    )
                 }
-                .padding(10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Theme.discard.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
-            }
+                .frame(height: 180)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(entry.filename).font(.headline)
-                Text(entry.date.formatted(date: .abbreviated, time: .shortened))
-                    .font(.caption)
-                    .foregroundStyle(Theme.inkSoft)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            FeatureInfoCard(rows: infoRows)
-
-            Spacer()
-
-            NavigationLink {
-                destinationView
-            } label: {
-                Text(actionLabel)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Theme.board)
-                    .foregroundStyle(.white)
+                if entry.status == .interrupted {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(Theme.discard)
+                        Text("This job never finished. The app was likely closed or ran out of time in the background, so nothing was saved to Photos.")
+                            .font(.caption)
+                            .foregroundStyle(Theme.discard)
+                    }
+                    .padding(10)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.discard.opacity(0.12))
                     .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(entry.filename).font(.headline)
+                    Text(entry.date.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption)
+                        .foregroundStyle(Theme.inkSoft)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                FeatureInfoCard(rows: infoRows)
+
+                NavigationLink {
+                    destinationView
+                } label: {
+                    Text(actionLabel)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Theme.board)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                }
             }
+            .padding()
         }
-        .padding()
         .background(Theme.paper)
         .navigationTitle("Details")
         .navigationBarTitleDisplayMode(.inline)

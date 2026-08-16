@@ -40,7 +40,7 @@ struct DuplicateFinderView: View {
                             .foregroundStyle(Theme.inkSoft)
                         Text("Find duplicate videos")
                             .font(.headline)
-                        Text("Scans for videos with the same length recorded the same day - the copies Compress and re-imports tend to leave behind.")
+                        Text("Scans for videos with the same length recorded the same day: the copies Compress and re-imports tend to leave behind.")
                             .font(.subheadline)
                             .foregroundStyle(Theme.inkSoft)
                             .multilineTextAlignment(.center)
@@ -50,24 +50,18 @@ struct DuplicateFinderView: View {
                         .init(icon: "checkmark.seal", label: "You decide", value: "Nothing deletes until you confirm"),
                         .init(icon: "lock.shield", label: "Privacy", value: "Scan happens entirely on-device"),
                     ])
+                    // Scanning is free for everyone - it's read-only and on-device. Only
+                    // deleting is gated, so a free user sees their real duplicate groups
+                    // before deciding whether Unlimited is worth it.
                     Button {
-                        if subscriptionStore.isSubscribed {
-                            Task { await scan() }
-                        } else {
-                            showPaywall = true
-                        }
+                        Task { await scan() }
                     } label: {
-                        HStack(spacing: 6) {
-                            if !subscriptionStore.isSubscribed {
-                                Image(systemName: "lock.fill")
-                            }
-                            Text(subscriptionStore.isSubscribed ? "Scan library" : "Scan library (Unlimited)")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Theme.board)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        Text("Scan library")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Theme.board)
+                            .foregroundStyle(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                 }
                 .padding()
@@ -130,7 +124,11 @@ struct DuplicateFinderView: View {
                     .font(.caption)
                     .foregroundStyle(Theme.inkSoft)
                 Button(role: .destructive) {
-                    Task { await deleteSelected() }
+                    if subscriptionStore.isSubscribed {
+                        Task { await deleteSelected() }
+                    } else {
+                        showPaywall = true
+                    }
                 } label: {
                     if isDeleting {
                         ProgressView().tint(.white)
@@ -139,12 +137,17 @@ struct DuplicateFinderView: View {
                             .background(Theme.discard)
                             .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     } else {
-                        Text("Delete selected")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Theme.discard)
-                            .foregroundStyle(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
+                        HStack(spacing: 6) {
+                            if !subscriptionStore.isSubscribed {
+                                Image(systemName: "lock.fill")
+                            }
+                            Text("Delete selected")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Theme.discard)
+                        .foregroundStyle(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.controlRadius))
                     }
                 }
                 .disabled(selectedIdentifiers.isEmpty || isDeleting)
